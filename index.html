@@ -1,0 +1,2752 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Förkorta och förlänga bråk</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-muted: #f1f5f9;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #4338ca;
+      --primary-hover: #3730a3;
+      --primary-soft: #eef2ff;
+      --primary-border: #c7d2fe;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --emerald-border: #a7f3d0;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --rose-border: #fecdd3;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --amber-border: #fde68a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Compact Header Bar */
+    .topbar {
+      height: 44px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 35;
+    }
+
+    .app-title {
+      font-size: 1.04rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    /* Two-Row Phase Bar (2 rows of 3 = 6 phases) */
+    .phase-bar-wrap {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 18px;
+      flex-shrink: 0;
+      z-index: 25;
+    }
+
+    .phase-nav {
+      max-width: 1060px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px 10px;
+    }
+
+    .phase-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 12px;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      background: var(--surface-muted);
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .phase-pill:hover:not(:disabled) {
+      border-color: var(--primary-border);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .phase-pill.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 5px rgba(67, 56, 202, 0.22);
+    }
+
+    .phase-pill.completed:not(.active) {
+      background: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: var(--emerald);
+    }
+
+    .phase-pill:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .pill-score {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.22);
+      flex-shrink: 0;
+    }
+
+    .phase-pill:not(.active) .pill-score {
+      background: rgba(15, 23, 42, 0.08);
+    }
+
+    /* Times Table Toggle Button */
+    .table-toggle-wrap {
+      position: relative;
+    }
+
+    .btn-table {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-table:hover,
+    .btn-table.open {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .btn-table.pulse-hint {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+      color: #92400e;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
+      animation: gentlePulse 1.4s infinite;
+    }
+
+    @keyframes gentlePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    /* Dropdown Multiplication Table */
+    .times-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 410px;
+      background: var(--surface);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 12px;
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
+      padding: 12px;
+      display: none;
+      z-index: 60;
+    }
+
+    .times-dropdown.open {
+      display: block;
+    }
+
+    .times-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .times-title {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .times-close {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .times-close:hover {
+      background: var(--surface-muted);
+      color: var(--text);
+    }
+
+    .times-grid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .times-grid th,
+    .times-grid td {
+      border: 1px solid var(--border);
+      padding: 4px 2px;
+      width: 9.09%;
+      transition: background-color 0.08s ease;
+    }
+
+    .times-grid th {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .times-grid th.corner {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .times-grid td {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      cursor: default;
+    }
+
+    .times-grid th.hl-head {
+      background: #c7d2fe;
+      color: #1e1b4b;
+    }
+
+    .times-grid td.hl-cross {
+      background: #eef2ff;
+    }
+
+    .times-grid td.hl-active {
+      background: #fde68a;
+      font-weight: 700;
+      color: #78350f;
+    }
+
+    .times-tip-box {
+      margin-top: 9px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      font-size: 0.76rem;
+      color: #78350f;
+      line-height: 1.4;
+    }
+
+    /* Main Workspace Container */
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 18px;
+      overflow-y: auto;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 1060px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+      padding: 14px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      gap: 12px;
+    }
+
+    .phase-heading {
+      font-size: 1.06rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .phase-sub {
+      font-size: 0.81rem;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .progress-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--surface-muted);
+      border: 1.5px solid var(--border-strong);
+      transition: all 0.2s ease;
+    }
+
+    .dot.filled {
+      background: var(--emerald);
+      border-color: var(--emerald);
+    }
+
+    .score-label {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 68px;
+      text-align: right;
+    }
+
+    /* Two-Column Chromebook Layout (Visual Aid Left + Workspace Right) */
+    .two-col-workspace {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .visual-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .work-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    @media (max-width: 820px) {
+      .two-col-workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Visual Aid Panel & Before/After Animations */
+    .visual-panel {
+      flex: 1;
+      background: #f8fafc;
+      border: 1.5px solid var(--primary-border);
+      border-radius: 13px;
+      padding: 11px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .visual-panel.from-mistake {
+      background: var(--amber-soft);
+      border-color: var(--amber-border);
+    }
+
+    .visual-badge {
+      font-size: 0.71rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border: 1px solid var(--primary-border);
+    }
+
+    .visual-panel.from-mistake .visual-badge {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: var(--amber-border);
+    }
+
+    .visual-svg-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .visual-frac-caption {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+      min-height: 36px;
+    }
+
+    .visual-caption-arrow {
+      color: var(--emerald);
+      font-weight: 800;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .visual-panel.is-after .visual-caption-arrow,
+    .visual-panel.is-after .visual-after-frac {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .visual-after-frac {
+      opacity: 0;
+      color: #065f46;
+      transition: opacity 0.45s ease;
+    }
+
+    .visual-desc {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.35;
+      min-height: 2.7em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .visual-panel.from-mistake .visual-desc {
+      color: #78350f;
+    }
+
+    /* SVG Line Transitions: Split (Förlänga) & Merge (Förkorta) */
+    .split-line {
+      opacity: 0;
+      stroke-dashoffset: 140;
+      transition: opacity 0.45s ease, stroke-dashoffset 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .visual-panel.is-after .split-line {
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+
+    .merge-inner-line {
+      opacity: 0.92;
+      transition: opacity 0.65s ease;
+    }
+
+    .visual-panel.is-after .merge-inner-line {
+      opacity: 0;
+    }
+
+    .aid-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-anim-step {
+      padding: 3px 10px;
+      border-radius: 7px;
+      border: 1.5px solid var(--primary-border);
+      background: #ffffff;
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+
+    .btn-anim-step:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+    }
+
+    .btn-anim-step.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .visual-panel.from-mistake .btn-anim-step {
+      border-color: #d97706;
+      color: #92400e;
+    }
+
+    .visual-panel.from-mistake .btn-anim-step:hover {
+      background: #fef3c7;
+    }
+
+    .visual-panel.from-mistake .btn-anim-step.selected {
+      background: #d97706;
+      border-color: #d97706;
+      color: #ffffff;
+    }
+
+    /* Vertical Fraction Styling - Strict Bråkform */
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      line-height: 1.08;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .frac-xs {
+      font-size: 0.85rem;
+    }
+
+    .frac-sm {
+      font-size: 0.94rem;
+    }
+
+    .frac-md {
+      font-size: 1.22rem;
+    }
+
+    .frac-lg {
+      font-size: 1.48rem;
+    }
+
+    .frac-num {
+      padding: 0 5px 3px 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .frac-bar {
+      width: 100%;
+      min-width: 24px;
+      height: 2.2px;
+      background-color: currentColor;
+      border-radius: 2px;
+    }
+
+    .frac-den {
+      padding: 3px 5px 0 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    /* Instruction Prompt */
+    .prompt-banner {
+      font-size: 1.01rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .step-history {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--emerald-soft);
+      border: 1px solid var(--emerald-border);
+      padding: 5px 11px;
+      border-radius: 9px;
+      font-size: 0.84rem;
+      color: #065f46;
+    }
+
+    /* Equation Builder Workspace (Phases 2-6) */
+    .equation-area {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 14px;
+      padding: 12px 14px 14px 14px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      flex-wrap: wrap;
+    }
+
+    .eq-frac-slot {
+      display: flex;
+      align-items: center;
+      height: 86px;
+    }
+
+    .eq-sign {
+      display: flex;
+      align-items: center;
+      height: 86px;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    /* Middle Column: Välj räknesätt positioned directly above the ? badges */
+    .middle-step-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .op-selector-above {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: #ffffff;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 5px 11px;
+      box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04);
+      position: relative;
+    }
+
+    .op-selector-above::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%) rotate(45deg);
+      width: 9px;
+      height: 9px;
+      background: #ffffff;
+      border-right: 1.5px solid var(--border-strong);
+      border-bottom: 1.5px solid var(--border-strong);
+    }
+
+    .op-selector-label {
+      font-size: 0.69rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+    }
+
+    .op-btn-group {
+      display: flex;
+      gap: 7px;
+    }
+
+    .op-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 33px;
+      border-radius: 8px;
+      border: 2px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1.38rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .op-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .op-btn.op-correct {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+    }
+
+    .op-btn.op-wrong {
+      background: var(--rose);
+      border-color: var(--rose);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(225, 29, 72, 0.28);
+    }
+
+    .op-btn:disabled {
+      cursor: default;
+    }
+
+    .prefilled-val {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 35px;
+      padding: 0 5px;
+      background: #e2e8f0;
+      color: var(--text);
+      border-radius: 7px;
+      font-size: 1.18rem;
+      font-weight: 700;
+    }
+
+    .op-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 32px;
+      border-radius: 7px;
+      background: var(--emerald-soft);
+      border: 1.5px solid var(--emerald);
+      color: #065f46;
+      font-size: 1.3rem;
+      font-weight: 800;
+      user-select: none;
+    }
+
+    .op-badge.unset {
+      background: #ffffff;
+      border-style: dashed;
+      border-color: var(--primary);
+      color: var(--primary);
+      font-size: 1.02rem;
+    }
+
+    .num-input {
+      width: 52px;
+      height: 35px;
+      border: 2px solid var(--border-strong);
+      border-radius: 8px;
+      background: #ffffff;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
+    }
+
+    .num-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.18);
+    }
+
+    .num-input:disabled.locked-pre-op {
+      background: #e2e8f0;
+      border-color: var(--border-strong);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .num-input:disabled.locked-solved {
+      background: var(--emerald-soft);
+      border-color: var(--emerald);
+      color: #065f46;
+    }
+
+    /* Remove number input arrows */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    /* Phase 1 Concept Choice Cards */
+    .concept-showcase {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .choices-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .choice-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 10px;
+      border-radius: 11px;
+      border: 2px solid var(--border-strong);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.91rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 68px;
+      text-align: center;
+    }
+
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .choice-btn.correct-pick {
+      border-color: var(--emerald);
+      background: var(--emerald-soft);
+      color: #065f46;
+    }
+
+    .choice-btn.wrong-pick {
+      border-color: var(--rose);
+      background: var(--rose-soft);
+      color: #9f1239;
+    }
+
+    .choice-btn:disabled {
+      cursor: default;
+    }
+
+    /* Phase 3 Final Decision Box */
+    .simplify-decision {
+      background: var(--primary-soft);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 11px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .decision-prompt {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .decision-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Feedback Banner & Controls */
+    .feedback-box {
+      padding: 8px 13px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.4;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .feedback-box.show {
+      display: flex;
+    }
+
+    .feedback-box.success {
+      background: var(--emerald-soft);
+      border: 1px solid var(--emerald-border);
+      color: #065f46;
+    }
+
+    .feedback-box.error {
+      background: var(--rose-soft);
+      border: 1px solid var(--rose-border);
+      color: #9f1239;
+    }
+
+    .feedback-box.table-warn {
+      background: var(--amber-soft);
+      border: 1.5px solid var(--amber-border);
+      color: #92400e;
+    }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 9px;
+    }
+
+    .rule-reminder {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      padding: 8px 18px;
+      border-radius: 10px;
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.91rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-emerald {
+      padding: 8px 15px;
+      border-radius: 9px;
+      border: none;
+      background: var(--emerald);
+      color: #ffffff;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: filter 0.15s ease;
+    }
+
+    .btn-emerald:hover {
+      filter: brightness(0.93);
+    }
+
+    .btn-outline {
+      padding: 7px 13px;
+      border-radius: 9px;
+      border: 1.5px solid var(--primary);
+      background: #ffffff;
+      color: var(--primary);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-outline:hover {
+      background: var(--primary-soft);
+    }
+
+    /* Teacher Badge */
+    .teacher-badge {
+      position: fixed;
+      bottom: 8px;
+      right: 12px;
+      background: #1e293b;
+      color: #f8fafc;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      display: none;
+      z-index: 40;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .teacher-badge.show {
+      display: block;
+    }
+
+    /* 2-Minute Lock Overlay Modal (> 3 consecutive mistakes) */
+    .freeze-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 120;
+    }
+
+    .freeze-overlay.open {
+      display: flex;
+    }
+
+    .freeze-card {
+      background: #ffffff;
+      border: 2.5px solid var(--amber);
+      border-radius: 18px;
+      max-width: 480px;
+      width: 100%;
+      padding: 28px 26px;
+      text-align: center;
+      box-shadow: 0 22px 48px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .freeze-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--amber-soft);
+      border: 2px solid var(--amber-border);
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+    }
+
+    .freeze-title {
+      font-size: 1.32rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .freeze-text {
+      font-size: 0.96rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .lock-timer-box {
+      background: var(--surface-muted);
+      border: 1.5px solid var(--border-strong);
+      border-radius: 12px;
+      padding: 10px 24px;
+      font-size: 1.85rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--primary);
+      letter-spacing: 0.04em;
+    }
+
+    .freeze-teacher-bar {
+      margin-top: 6px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .btn-teacher-unfreeze {
+      background: var(--surface-muted);
+      border: 1px solid var(--border-strong);
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .btn-teacher-unfreeze:hover {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Phase Complete Banner inside Card */
+    .complete-panel {
+      text-align: center;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .complete-panel h2 {
+      font-size: 1.32rem;
+      color: var(--emerald);
+    }
+
+    .complete-panel p {
+      color: var(--text-muted);
+      font-size: 0.96rem;
+      max-width: 520px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Compact Header Bar -->
+  <header class="topbar">
+    <div class="app-title">Förkorta och förlänga bråk</div>
+
+    <div class="table-toggle-wrap">
+      <button type="button" class="btn-table" id="tableToggleBtn" aria-expanded="false">
+        <span>Multiplikationstabell</span>
+        <span id="tableArrow">▾</span>
+      </button>
+
+      <div class="times-dropdown" id="timesDropdown" role="region" aria-label="Multiplikationstabell 1 till 10">
+        <div class="times-header">
+          <span class="times-title">Multiplikationstabell (1–10)</span>
+          <button type="button" class="times-close" id="tableCloseBtn" aria-label="Stäng">✕</button>
+        </div>
+        <table class="times-grid" id="timesGrid"></table>
+        <div class="times-tip-box">
+          <strong>Så här dividerar du med tabellen:</strong><br />
+          Börja vid <strong>nämnaren</strong> (eller talet du delar med) i översta raden, dra nedåt i samma kolumn tills du hittar <strong>täljaren</strong>, och läs av svaret längst ut till vänster!
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Two-Row Phase Bar (2 rows of 3 = 6 phases) -->
+  <div class="phase-bar-wrap">
+    <nav class="phase-nav" id="phaseNav" aria-label="Faser"></nav>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="main-wrap">
+    <section class="card" id="mainCard" aria-live="polite"></section>
+  </main>
+
+  <!-- Subtle Teacher Unlock Badge -->
+  <div class="teacher-badge" id="teacherBadge">Lärarläge: Alla faser upplåsta (Shift + L)</div>
+
+  <!-- 2-Minute Lock Modal (> 3 Consecutive Mistakes) -->
+  <div class="freeze-overlay" id="freezeOverlay" role="dialog" aria-modal="true" aria-labelledby="freezeTitle">
+    <div class="freeze-card">
+      <div class="freeze-icon" aria-hidden="true">✋</div>
+      <h2 class="freeze-title" id="freezeTitle">Skärmen är låst i 2 minuter</h2>
+      <p class="freeze-text">
+        Du har svarat fel <strong>mer än tre gånger i rad</strong>. Räck upp handen och be din lärare om hjälp att gå igenom uppgiften innan du fortsätter!
+      </p>
+      <div class="lock-timer-box" id="lockTimerDisplay" aria-live="off">02:00</div>
+      <div class="freeze-teacher-bar">
+        <span>Lärare: tryck <strong>Shift + L</strong></span>
+        <button type="button" class="btn-teacher-unfreeze" id="teacherUnfreezeBtn">Lås upp (Lärare)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const PHASES = [
+        {
+          id: 0,
+          shortName: "1. Begrepp",
+          title: "Fas 1: Förkorta och förlänga",
+          desc: "Känn igen vad som händer med täljare och nämnare.",
+          subtypes: ["id_div", "id_mult", "pick_mult", "pick_div"]
+        },
+        {
+          id: 1,
+          shortName: "2. Förkorta",
+          title: "Fas 2: Förkorta med ett givet tal",
+          desc: "Välj / och dividera både täljaren och nämnaren med samma tal.",
+          subtypes: ["div_2", "div_3", "div_4", "div_5"]
+        },
+        {
+          id: 2,
+          shortName: "3. Enklaste form",
+          title: "Fas 3: Så liten nämnare som möjligt",
+          desc: "Välj själv ett tal att förkorta med tills bråket inte går att förkorta mer.",
+          subtypes: ["one_step", "multi_step"]
+        },
+        {
+          id: 3,
+          shortName: "4. Förläng",
+          title: "Fas 4: Förläng med ett givet tal",
+          desc: "Välj · och multiplicera både täljaren och nämnaren med samma tal.",
+          subtypes: ["mult_2", "mult_3", "mult_4", "mult_5", "mult_6"]
+        },
+        {
+          id: 4,
+          shortName: "5. Ny nämnare",
+          title: "Fas 5: Förläng till bestämd nämnare",
+          desc: "Ta reda på vilket tal nämnaren ska multipliceras med.",
+          subtypes: ["group_10_20", "group_12_16_18_24", "group_15_30", "group_100"]
+        },
+        {
+          id: 5,
+          shortName: "6. Blandat",
+          title: "Fas 6: Blandade uppgifter",
+          desc: "Avgör själv om du ska förkorta ( / ) eller förlänga ( · ) och lös uppgiften.",
+          subtypes: ["div_given", "div_simplest", "mult_given", "mult_target"]
+        }
+      ];
+
+      const TARGET_SCORE = 5;
+      const LOCK_CONSECUTIVE_LIMIT = 3; // Locks when consecutiveMistakes > 3 (i.e. >= 4)
+      const LOCK_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+
+      const state = {
+        currentPhase: 0,
+        scores: [0, 0, 0, 0, 0, 0],
+        unlockedPhase: 0,
+        teacherMode: false,
+        consecutiveMistakes: 0,
+        lockedUntil: 0,
+        lockTimerId: null,
+        subtypeDecks: [[], [], [], [], [], []],
+        subtypeHistory: [[], [], [], [], [], []],
+        question: null,
+        selectedOp: null, // 'mult' or 'div'
+        opVerified: false, // Must be true before filling numbers
+        wrongOpTried: null, // 'mult' or 'div' if wrong button was clicked
+        questionSolved: false,
+        awaitingFinalDecision: false, // Phase 3 / mixed div_simplest after valid step
+        phase3History: [],
+        // Visual aid state (always visible in Phases 1, 2, 4, 5; pops up on error in Phases 3, 6)
+        showVisualAid: true,
+        visualFromMistake: false,
+        visualIsAfter: false,
+        visualStepOverride: null
+      };
+
+      // Math helpers
+      function gcd(a, b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b !== 0) {
+          const t = b;
+          b = a % b;
+          a = t;
+        }
+        return a;
+      }
+
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function pickRandom(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+      }
+
+      function shuffle(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      // Balanced subtype deck picker: even distribution & never repeats a subtype 3 times in a row
+      function drawBalancedSubtype(phaseIdx) {
+        const subtypes = PHASES[phaseIdx].subtypes;
+        const history = state.subtypeHistory[phaseIdx];
+        let deck = state.subtypeDecks[phaseIdx];
+
+        if (deck.length === 0) {
+          deck = shuffle(subtypes);
+        }
+
+        const last1 = history.length >= 1 ? history[history.length - 1] : null;
+        const last2 = history.length >= 2 ? history[history.length - 2] : null;
+        const forbidden = last1 !== null && last1 === last2 ? last1 : null;
+
+        let pickIdx = deck.findIndex((st) => st !== forbidden);
+        if (pickIdx === -1) {
+          deck = shuffle(subtypes);
+          pickIdx = deck.findIndex((st) => st !== forbidden);
+          if (pickIdx === -1) pickIdx = 0;
+        }
+
+        const chosen = deck.splice(pickIdx, 1)[0];
+        state.subtypeDecks[phaseIdx] = deck;
+        history.push(chosen);
+        return chosen;
+      }
+
+      // Vertical fraction HTML builder (strictly bråkform)
+      function fracHTML(num, den, size = "md") {
+        return `
+          <span class="frac frac-${size}">
+            <span class="frac-num">${num}</span>
+            <span class="frac-bar"></span>
+            <span class="frac-den">${den}</span>
+          </span>
+        `;
+      }
+
+      function stepFracHTML(num, opChar, factor, den, size = "md") {
+        return `
+          <span class="frac frac-${size}">
+            <span class="frac-num">${num} ${opChar} ${factor}</span>
+            <span class="frac-bar"></span>
+            <span class="frac-den">${den} ${opChar} ${factor}</span>
+          </span>
+        `;
+      }
+
+      // Build 10x10 Multiplication Table
+      function buildTimesTable() {
+        const table = document.getElementById("timesGrid");
+        let html = "<thead><tr><th class='corner'>·</th>";
+        for (let c = 1; c <= 10; c++) {
+          html += `<th data-col="${c}">${c}</th>`;
+        }
+        html += "</tr></thead><tbody>";
+        for (let r = 1; r <= 10; r++) {
+          html += `<tr><th data-row="${r}">${r}</th>`;
+          for (let c = 1; c <= 10; c++) {
+            html += `<td data-r="${r}" data-c="${c}">${r * c}</td>`;
+          }
+          html += "</tr>";
+        }
+        html += "</tbody>";
+        table.innerHTML = html;
+
+        table.addEventListener("mouseover", (e) => {
+          const cell = e.target.closest("td");
+          clearTableHighlight();
+          if (!cell) return;
+          const r = cell.dataset.r;
+          const c = cell.dataset.c;
+          cell.classList.add("hl-active");
+          table.querySelector(`th[data-row="${r}"]`)?.classList.add("hl-head");
+          table.querySelector(`th[data-col="${c}"]`)?.classList.add("hl-head");
+          table.querySelectorAll(`td[data-r="${r}"], td[data-c="${c}"]`).forEach((td) => {
+            if (td !== cell) td.classList.add("hl-cross");
+          });
+        });
+
+        table.addEventListener("mouseleave", clearTableHighlight);
+      }
+
+      function clearTableHighlight() {
+        document.querySelectorAll("#timesGrid .hl-head").forEach((el) => el.classList.remove("hl-head"));
+        document.querySelectorAll("#timesGrid .hl-cross").forEach((el) => el.classList.remove("hl-cross"));
+        document.querySelectorAll("#timesGrid .hl-active").forEach((el) => el.classList.remove("hl-active"));
+      }
+
+      function setTableOpen(open) {
+        const dd = document.getElementById("timesDropdown");
+        const btn = document.getElementById("tableToggleBtn");
+        const arrow = document.getElementById("tableArrow");
+        dd.classList.toggle("open", open);
+        btn.classList.toggle("open", open);
+        btn.setAttribute("aria-expanded", String(open));
+        arrow.textContent = open ? "▴" : "▾";
+        if (open) {
+          btn.classList.remove("pulse-hint");
+        }
+      }
+
+      /* ========================================================================
+         ANIMATED BEFORE / AFTER VISUAL MODEL (FÖRLÄNGA = SPLIT, FÖRKORTA = MERGE)
+         ======================================================================== */
+
+      function getVisualSpec(q) {
+        if (state.visualStepOverride) {
+          return state.visualStepOverride;
+        }
+        if (q.type === "concept") {
+          return q.visualSpec;
+        }
+        if (q.mode === "div_given") {
+          return {
+            op: "div",
+            fromN: q.curNum,
+            fromD: q.curDen,
+            factor: q.givenFactor
+          };
+        }
+        if (q.mode === "div_simplest") {
+          const g = gcd(q.curNum, q.curDen);
+          return {
+            op: "div",
+            fromN: q.curNum,
+            fromD: q.curDen,
+            factor: g > 1 ? g : 2
+          };
+        }
+        if (q.mode === "mult_given") {
+          return {
+            op: "mult",
+            fromN: q.curNum,
+            fromD: q.curDen,
+            factor: q.givenFactor
+          };
+        }
+        // mult_target
+        return {
+          op: "mult",
+          fromN: q.curNum,
+          fromD: q.curDen,
+          factor: Math.max(2, Math.round(q.targetDen / q.curDen))
+        };
+      }
+
+      function buildVisualSVG(spec) {
+        const fill = "#4f46e5";
+        const empty = "#e2e8f0";
+        const strongStroke = "#0f172a";
+
+        if (spec.op === "mult") {
+          const smallN = spec.fromN;
+          const smallD = spec.fromD;
+          const k = spec.factor;
+          const bigD = smallD * k;
+
+          // Special 10x10 hundredths grid when target denominator is 100
+          if (bigD === 100) {
+            const cell = 11.4;
+            const size = cell * 10;
+            const blockDims = {
+              2: [10, 5],
+              4: [5, 5],
+              5: [2, 10],
+              10: [1, 10],
+              20: [1, 5],
+              25: [2, 2],
+              50: [1, 2]
+            };
+            const [bRows, bCols] = blockDims[smallD] || [1, 10];
+            const blocksPerRow = 10 / bCols;
+            let svg = "";
+
+            for (let bIdx = 0; bIdx < smallD; bIdx++) {
+              const br = Math.floor(bIdx / blocksPerRow);
+              const bc = bIdx % blocksPerRow;
+              const bx = bc * bCols * cell;
+              const by = br * bRows * cell;
+              const blockFill = bIdx < smallN ? fill : empty;
+              svg += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bCols * cell).toFixed(1)}" height="${(bRows * cell).toFixed(1)}" fill="${blockFill}" />`;
+            }
+
+            // Animated inner 10x10 subdivision lines
+            for (let i = 1; i < 10; i++) {
+              const p = (i * cell).toFixed(1);
+              svg += `<line class="split-line" x1="${p}" y1="0" x2="${p}" y2="${size}" stroke="${strongStroke}" stroke-width="0.95" stroke-dasharray="120" />`;
+              svg += `<line class="split-line" x1="0" y1="${p}" x2="${size}" y2="${p}" stroke="${strongStroke}" stroke-width="0.95" stroke-dasharray="120" />`;
+            }
+
+            // Strong original block borders
+            for (let bIdx = 0; bIdx < smallD; bIdx++) {
+              const br = Math.floor(bIdx / blocksPerRow);
+              const bc = bIdx % blocksPerRow;
+              const bx = bc * bCols * cell;
+              const by = br * bRows * cell;
+              svg += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bCols * cell).toFixed(1)}" height="${(bRows * cell).toFixed(1)}" fill="none" stroke="${strongStroke}" stroke-width="1.9" />`;
+            }
+
+            return `<svg width="118" height="118" viewBox="-2 -2 118 118" style="display:block;">${svg}</svg>`;
+          }
+
+          // Whole bar model: starts with smallD pieces, splits into bigD = smallD * k pieces
+          const barW = 248;
+          const barH = 44;
+          const bigCellW = barW / smallD;
+          const fineCellW = barW / bigD;
+          let svg = "";
+
+          for (let i = 0; i < smallD; i++) {
+            const x = (i * bigCellW + 1.5).toFixed(2);
+            const cellFill = i < smallN ? fill : empty;
+            svg += `<rect x="${x}" y="1.5" width="${bigCellW.toFixed(2)}" height="${barH}" fill="${cellFill}" stroke="${strongStroke}" stroke-width="2" />`;
+          }
+
+          for (let idx = 1; idx < bigD; idx++) {
+            if (idx % k !== 0) {
+              const x = (idx * fineCellW + 1.5).toFixed(2);
+              svg += `<line class="split-line" x1="${x}" y1="2" x2="${x}" y2="${barH + 1}" stroke="${strongStroke}" stroke-width="1.45" stroke-dasharray="50" />`;
+            }
+          }
+
+          return `<svg width="${barW + 3}" height="${barH + 3}" viewBox="0 0 ${barW + 3} ${barH + 3}" style="display:block; max-width:100%;">${svg}</svg>`;
+        }
+
+        // spec.op === "div": Whole bar starts with bigD small pieces, merges every k pieces into smallD = bigD / k pieces
+        const bigN = spec.fromN;
+        const bigD = spec.fromD;
+        const k = spec.factor;
+        const smallD = Math.max(1, Math.round(bigD / k));
+        const barW = 248;
+        const barH = 44;
+        const fineCellW = barW / bigD;
+        const groupW = barW / smallD;
+        let svg = "";
+
+        // Background & shaded fine pieces
+        for (let i = 0; i < bigD; i++) {
+          const x = (i * fineCellW + 1.5).toFixed(2);
+          const cellFill = i < bigN ? fill : empty;
+          svg += `<rect x="${x}" y="1.5" width="${fineCellW.toFixed(2)}" height="${barH}" fill="${cellFill}" />`;
+        }
+
+        // Inner lines inside each group of k (fade out smoothly when merging in "Efter")
+        for (let idx = 1; idx < bigD; idx++) {
+          if (idx % k !== 0) {
+            const x = (idx * fineCellW + 1.5).toFixed(2);
+            svg += `<line class="merge-inner-line" x1="${x}" y1="1.5" x2="${x}" y2="${barH + 1.5}" stroke="#334155" stroke-width="1.45" />`;
+          }
+        }
+
+        // Persistent outer & merged-group borders
+        for (let g = 0; g < smallD; g++) {
+          const gx = (g * groupW + 1.5).toFixed(2);
+          svg += `<rect x="${gx}" y="1.5" width="${groupW.toFixed(2)}" height="${barH}" fill="none" stroke="${strongStroke}" stroke-width="2.1" />`;
+        }
+
+        return `<svg width="${barW + 3}" height="${barH + 3}" viewBox="0 0 ${barW + 3} ${barH + 3}" style="display:block; max-width:100%;">${svg}</svg>`;
+      }
+
+      function buildVisualPanelHTML(q) {
+        const spec = getVisualSpec(q);
+        const isAfter = state.visualIsAfter;
+        const isMult = spec.op === "mult";
+        const k = spec.factor;
+
+        const afterN = isMult ? spec.fromN * k : Math.round(spec.fromN / k);
+        const afterD = isMult ? spec.fromD * k : Math.round(spec.fromD / k);
+
+        const badgeText = state.visualFromMistake
+          ? "Hjälpmedel (Figur)"
+          : (isMult ? "Figur: Förlängning" : "Figur: Förkortning");
+
+        let descText = "";
+        if (isMult) {
+          descText = isAfter
+            ? `Efter: Varje bit har delats i ${k} mindre bitar – lika mycket är färgat!`
+            : `Före: Figuren har ${spec.fromD} bitar (${spec.fromN} färgade). Klicka på Efter för att dela varje bit i ${k}.`;
+        } else {
+          descText = isAfter
+            ? `Efter: Varje grupp om ${k} bitar har slagits ihop till en större bit – lika mycket är färgat!`
+            : `Före: Figuren har ${spec.fromD} bitar (${spec.fromN} färgade). Klicka på Efter för att slå ihop ${k} och ${k}.`;
+        }
+
+        const panelClasses = ["visual-panel"];
+        if (state.visualFromMistake) panelClasses.push("from-mistake");
+        if (isAfter) panelClasses.push("is-after");
+
+        return `
+          <div class="${panelClasses.join(" ")}" id="visualAidPanel" role="region" aria-label="Visuell animation av bråket">
+            <span class="visual-badge">${badgeText}</span>
+
+            <div class="visual-svg-stage">
+              ${buildVisualSVG(spec)}
+              <div class="visual-frac-caption">
+                ${fracHTML(spec.fromN, spec.fromD, "sm")}
+                <span class="visual-caption-arrow">=</span>
+                <span class="visual-after-frac">${fracHTML(afterN, afterD, "sm")}</span>
+              </div>
+            </div>
+
+            <div class="visual-desc" id="visualDescText">${descText}</div>
+
+            <div class="aid-controls">
+              <button type="button" class="btn-anim-step ${!isAfter ? "selected" : ""}" id="btnVisualBefore">Före</button>
+              <button type="button" class="btn-anim-step ${isAfter ? "selected" : ""}" id="btnVisualAfter">Efter</button>
+              <button type="button" class="btn-anim-step" id="btnVisualReplay" title="Spela upp animationen igen">↻ Spela upp</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // Smoothly transition the visual aid to "Efter" without disturbing inputs or focus
+      function triggerVisualAfter(replayFromBefore = false) {
+        const panel = document.getElementById("visualAidPanel");
+        if (!panel) {
+          state.visualIsAfter = true;
+          return;
+        }
+
+        const applyAfterState = () => {
+          state.visualIsAfter = true;
+          const p = document.getElementById("visualAidPanel");
+          if (!p) return;
+          p.classList.add("is-after");
+          document.getElementById("btnVisualBefore")?.classList.remove("selected");
+          document.getElementById("btnVisualAfter")?.classList.add("selected");
+
+          const spec = getVisualSpec(state.question);
+          const descEl = document.getElementById("visualDescText");
+          if (descEl) {
+            descEl.textContent = spec.op === "mult"
+              ? `Efter: Varje bit har delats i ${spec.factor} mindre bitar – lika mycket är färgat!`
+              : `Efter: Varje grupp om ${spec.factor} bitar har slagits ihop till en större bit – lika mycket är färgat!`;
+          }
+        };
+
+        if (replayFromBefore) {
+          state.visualIsAfter = false;
+          panel.classList.remove("is-after");
+          document.getElementById("btnVisualBefore")?.classList.add("selected");
+          document.getElementById("btnVisualAfter")?.classList.remove("selected");
+          requestAnimationFrame(() => {
+            requestAnimationFrame(applyAfterState);
+          });
+        } else {
+          requestAnimationFrame(applyAfterState);
+        }
+      }
+
+      function setVisualBeforeDirect() {
+        state.visualIsAfter = false;
+        const p = document.getElementById("visualAidPanel");
+        if (!p) return;
+        p.classList.remove("is-after");
+        document.getElementById("btnVisualBefore")?.classList.add("selected");
+        document.getElementById("btnVisualAfter")?.classList.remove("selected");
+
+        const spec = getVisualSpec(state.question);
+        const descEl = document.getElementById("visualDescText");
+        if (descEl) {
+          descEl.textContent = spec.op === "mult"
+            ? `Före: Figuren har ${spec.fromD} bitar (${spec.fromN} färgade). Klicka på Efter för att dela varje bit i ${spec.factor}.`
+            : `Före: Figuren har ${spec.fromD} bitar (${spec.fromN} färgade). Klicka på Efter för att slå ihop ${spec.factor} och ${spec.factor}.`;
+        }
+      }
+
+      function wireVisualControls() {
+        document.getElementById("btnVisualBefore")?.addEventListener("click", () => {
+          if (isScreenLocked()) return;
+          setVisualBeforeDirect();
+        });
+        document.getElementById("btnVisualAfter")?.addEventListener("click", () => {
+          if (isScreenLocked()) return;
+          triggerVisualAfter(false);
+        });
+        document.getElementById("btnVisualReplay")?.addEventListener("click", () => {
+          if (isScreenLocked()) return;
+          triggerVisualAfter(true);
+        });
+      }
+
+      // Balanced Dynamic Question Generators
+      function generatePhase1BySubtype(subtype) {
+        let baseDen = randInt(3, 7);
+        let baseNum = randInt(1, baseDen - 1);
+        while (gcd(baseNum, baseDen) !== 1) {
+          baseDen = randInt(3, 7);
+          baseNum = randInt(1, baseDen - 1);
+        }
+        const k = randInt(2, 4);
+        const bigNum = baseNum * k;
+        const bigDen = baseDen * k;
+
+        if (subtype === "id_div") {
+          return {
+            subtype,
+            type: "concept",
+            visualSpec: { op: "div", fromN: bigNum, fromD: bigDen, factor: k },
+            prompt: "Titta på uträkningen nedan. Vad har gjorts med bråket?",
+            showcaseHTML: `
+              ${fracHTML(bigNum, bigDen, "lg")}
+              <span class="eq-sign" style="height:auto">=</span>
+              ${stepFracHTML(bigNum, "/", k, bigDen, "lg")}
+              <span class="eq-sign" style="height:auto">=</span>
+              ${fracHTML(baseNum, baseDen, "lg")}
+            `,
+            choices: shuffle([
+              { id: "ok", html: `Förkortat med ${k}`, correct: true },
+              { id: "w1", html: `Förlängt med ${k}`, correct: false },
+              { id: "w2", html: `Multiplicerat med ${k}`, correct: false }
+            ]),
+            explanation: `Rätt! När vi dividerar ( / ) både täljaren och nämnaren med ${k} förkortar vi bråket med ${k}.`
+          };
+        }
+
+        if (subtype === "id_mult") {
+          return {
+            subtype,
+            type: "concept",
+            visualSpec: { op: "mult", fromN: baseNum, fromD: baseDen, factor: k },
+            prompt: "Titta på uträkningen nedan. Vad har gjorts med bråket?",
+            showcaseHTML: `
+              ${fracHTML(baseNum, baseDen, "lg")}
+              <span class="eq-sign" style="height:auto">=</span>
+              ${stepFracHTML(baseNum, "·", k, baseDen, "lg")}
+              <span class="eq-sign" style="height:auto">=</span>
+              ${fracHTML(bigNum, bigDen, "lg")}
+            `,
+            choices: shuffle([
+              { id: "ok", html: `Förlängt med ${k}`, correct: true },
+              { id: "w1", html: `Förkortat med ${k}`, correct: false },
+              { id: "w2", html: `Dividerat med ${k}`, correct: false }
+            ]),
+            explanation: `Rätt! När vi multiplicerar ( · ) både täljaren och nämnaren med ${k} förlänger vi bråket med ${k}.`
+          };
+        }
+
+        if (subtype === "pick_mult") {
+          const wrongK = k === 2 ? 3 : 2;
+          return {
+            subtype,
+            type: "concept",
+            visualSpec: { op: "mult", fromN: baseNum, fromD: baseDen, factor: k },
+            prompt: `Vilken uträkning visar en korrekt förlängning av ${fracHTML(baseNum, baseDen, "sm")} ?`,
+            showcaseHTML: null,
+            choices: shuffle([
+              {
+                id: "ok",
+                html: `${stepFracHTML(baseNum, "·", k, baseDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, bigDen, "md")}`,
+                correct: true
+              },
+              {
+                id: "w1",
+                html: `${fracHTML(`${baseNum} · ${k}`, baseDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, baseDen, "md")}`,
+                correct: false
+              },
+              {
+                id: "w2",
+                html: `${fracHTML(`${baseNum} · ${k}`, `${baseDen} · ${wrongK}`, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, baseDen * wrongK, "md")}`,
+                correct: false
+              }
+            ]),
+            explanation: `Rätt! Vid förlängning måste både täljaren och nämnaren multipliceras med exakt samma tal (${k}).`
+          };
+        }
+
+        const wrongK = k === 2 ? 3 : 2;
+        return {
+          subtype,
+          type: "concept",
+          visualSpec: { op: "div", fromN: bigNum, fromD: bigDen, factor: k },
+          prompt: `Vilken uträkning visar en korrekt förkortning av ${fracHTML(bigNum, bigDen, "sm")} ?`,
+          showcaseHTML: null,
+          choices: shuffle([
+            {
+              id: "ok",
+              html: `${stepFracHTML(bigNum, "/", k, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(baseNum, baseDen, "md")}`,
+              correct: true
+            },
+            {
+              id: "w1",
+              html: `${fracHTML(`${bigNum} / ${k}`, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(baseNum, bigDen, "md")}`,
+              correct: false
+            },
+            {
+              id: "w2",
+              html: `${stepFracHTML(bigNum, "·", wrongK, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum * wrongK, bigDen * wrongK, "md")}`,
+              correct: false
+            }
+          ]),
+          explanation: `Rätt! Vid förkortning dividerar ( / ) vi både täljaren och nämnaren med samma tal (${k}).`
+        };
+      }
+
+      function generatePhase2BySubtype(subtype) {
+        const k = Number(subtype.split("_")[1]) || pickRandom([2, 3, 4, 5]);
+        let baseDen, baseNum;
+        do {
+          baseDen = randInt(2, 7);
+          baseNum = randInt(1, baseDen - 1);
+        } while (gcd(baseNum, baseDen) !== 1 || baseDen * k > 28);
+
+        return {
+          subtype,
+          type: "step",
+          mode: "div_given",
+          expectedOp: "div",
+          origNum: baseNum * k,
+          origDen: baseDen * k,
+          curNum: baseNum * k,
+          curDen: baseDen * k,
+          givenFactor: k,
+          prompt: `Förkorta bråket med <strong>${k}</strong>.`
+        };
+      }
+
+      function generatePhase3BySubtype(subtype) {
+        const multipliers = subtype === "one_step" ? [3, 4, 5, 6] : [8, 9, 10, 12];
+        let baseDen, baseNum, k;
+        do {
+          baseDen = randInt(2, 6);
+          baseNum = randInt(1, baseDen - 1);
+          k = pickRandom(multipliers);
+        } while (gcd(baseNum, baseDen) !== 1 || baseDen * k > 36);
+
+        return {
+          subtype,
+          type: "step",
+          mode: "div_simplest",
+          expectedOp: "div",
+          origNum: baseNum * k,
+          origDen: baseDen * k,
+          curNum: baseNum * k,
+          curDen: baseDen * k,
+          givenFactor: null,
+          prompt: "Förkorta bråket med så liten nämnare som möjligt."
+        };
+      }
+
+      function generatePhase4BySubtype(subtype) {
+        const k = Number(subtype.split("_")[1]) || pickRandom([2, 3, 4, 5, 6]);
+        let baseDen, baseNum;
+        do {
+          baseDen = randInt(2, 6);
+          baseNum = randInt(1, baseDen - 1);
+        } while (baseDen * k > 30);
+
+        return {
+          subtype,
+          type: "step",
+          mode: "mult_given",
+          expectedOp: "mult",
+          origNum: baseNum,
+          origDen: baseDen,
+          curNum: baseNum,
+          curDen: baseDen,
+          givenFactor: k,
+          prompt: `Förläng bråket med <strong>${k}</strong>.`
+        };
+      }
+
+      function generatePhase5BySubtype(subtype) {
+        const presetGroups = {
+          group_10_20: [
+            { baseDen: 2, targetDen: 10 },
+            { baseDen: 5, targetDen: 10 },
+            { baseDen: 4, targetDen: 20 },
+            { baseDen: 5, targetDen: 20 },
+            { baseDen: 10, targetDen: 20 }
+          ],
+          group_12_16_18_24: [
+            { baseDen: 2, targetDen: 12 },
+            { baseDen: 3, targetDen: 12 },
+            { baseDen: 4, targetDen: 12 },
+            { baseDen: 6, targetDen: 12 },
+            { baseDen: 4, targetDen: 16 },
+            { baseDen: 8, targetDen: 16 },
+            { baseDen: 3, targetDen: 18 },
+            { baseDen: 6, targetDen: 18 },
+            { baseDen: 9, targetDen: 18 },
+            { baseDen: 3, targetDen: 24 },
+            { baseDen: 4, targetDen: 24 },
+            { baseDen: 6, targetDen: 24 },
+            { baseDen: 8, targetDen: 24 }
+          ],
+          group_15_30: [
+            { baseDen: 3, targetDen: 15 },
+            { baseDen: 5, targetDen: 15 },
+            { baseDen: 5, targetDen: 30 },
+            { baseDen: 6, targetDen: 30 },
+            { baseDen: 10, targetDen: 30 }
+          ],
+          group_100: [
+            { baseDen: 4, targetDen: 100 },
+            { baseDen: 5, targetDen: 100 },
+            { baseDen: 10, targetDen: 100 },
+            { baseDen: 20, targetDen: 100 },
+            { baseDen: 25, targetDen: 100 },
+            { baseDen: 50, targetDen: 100 }
+          ]
+        };
+
+        const chosen = pickRandom(presetGroups[subtype] || presetGroups.group_10_20);
+        let baseNum = randInt(1, chosen.baseDen - 1);
+        while (gcd(baseNum, chosen.baseDen) !== 1 && chosen.baseDen > 2) {
+          baseNum = randInt(1, chosen.baseDen - 1);
+        }
+
+        return {
+          subtype,
+          type: "step",
+          mode: "mult_target",
+          expectedOp: "mult",
+          origNum: baseNum,
+          origDen: chosen.baseDen,
+          curNum: baseNum,
+          curDen: chosen.baseDen,
+          targetDen: chosen.targetDen,
+          prompt: `Förläng bråket så att nämnaren blir <strong>${chosen.targetDen}</strong>.`
+        };
+      }
+
+      function generatePhase6BySubtype(subtype) {
+        let q;
+        if (subtype === "div_given") {
+          q = generatePhase2BySubtype(pickRandom(PHASES[1].subtypes));
+        } else if (subtype === "div_simplest") {
+          q = generatePhase3BySubtype(pickRandom(PHASES[2].subtypes));
+        } else if (subtype === "mult_given") {
+          q = generatePhase4BySubtype(pickRandom(PHASES[3].subtypes));
+        } else {
+          q = generatePhase5BySubtype(pickRandom(PHASES[4].subtypes));
+        }
+        q.subtype = subtype;
+        return q;
+      }
+
+      function createQuestionForPhase(phaseIdx) {
+        const subtype = drawBalancedSubtype(phaseIdx);
+        let q;
+        let attempts = 0;
+        const prevSig = state.question ? JSON.stringify(state.question) : "";
+        do {
+          if (phaseIdx === 0) q = generatePhase1BySubtype(subtype);
+          else if (phaseIdx === 1) q = generatePhase2BySubtype(subtype);
+          else if (phaseIdx === 2) q = generatePhase3BySubtype(subtype);
+          else if (phaseIdx === 3) q = generatePhase4BySubtype(subtype);
+          else if (phaseIdx === 4) q = generatePhase5BySubtype(subtype);
+          else q = generatePhase6BySubtype(subtype);
+          attempts++;
+        } while (JSON.stringify(q) === prevSig && attempts < 10);
+        return q;
+      }
+
+      // Preserve & Restore Input Values Across Re-renders (when popping open visual aid on error)
+      function captureInputDrafts() {
+        const saved = {};
+        ["stepNumInput", "stepDenInput", "resNumInput", "resDenInput"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            saved[id] = el.value;
+          }
+        });
+        return saved;
+      }
+
+      function restoreInputDrafts(saved) {
+        if (!saved) return;
+        Object.entries(saved).forEach(([id, val]) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = val;
+          }
+        });
+      }
+
+      // 2-Minute Lock Timer Helpers
+      function isScreenLocked() {
+        return state.lockedUntil > Date.now();
+      }
+
+      function formatCountdown(ms) {
+        const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      function updateLockOverlayUI() {
+        const overlay = document.getElementById("freezeOverlay");
+        const timerDisplay = document.getElementById("lockTimerDisplay");
+        const remaining = state.lockedUntil - Date.now();
+
+        if (remaining <= 0) {
+          unfreezeApp();
+          return;
+        }
+
+        overlay.classList.add("open");
+        timerDisplay.textContent = formatCountdown(remaining);
+      }
+
+      function triggerFreeze() {
+        state.lockedUntil = Date.now() + LOCK_DURATION_MS;
+        updateLockOverlayUI();
+        if (state.lockTimerId) {
+          clearInterval(state.lockTimerId);
+        }
+        state.lockTimerId = setInterval(updateLockOverlayUI, 250);
+      }
+
+      function unfreezeApp() {
+        state.lockedUntil = 0;
+        state.consecutiveMistakes = 0;
+        if (state.lockTimerId) {
+          clearInterval(state.lockTimerId);
+          state.lockTimerId = null;
+        }
+        const overlay = document.getElementById("freezeOverlay");
+        if (overlay) overlay.classList.remove("open");
+      }
+
+      function isAlwaysVisibleVisualPhase(phaseIdx) {
+        // Always visible in Phases 1 (0), 2 (1), 4 (3), and 5 (4); pops up on error in Phases 3 (2) and 6 (5)
+        return phaseIdx === 0 || phaseIdx === 1 || phaseIdx === 3 || phaseIdx === 4;
+      }
+
+      function loadNewQuestion() {
+        if (isScreenLocked()) return;
+        state.question = createQuestionForPhase(state.currentPhase);
+        state.selectedOp = null;
+        state.opVerified = false;
+        state.wrongOpTried = null;
+        state.questionSolved = false;
+        state.awaitingFinalDecision = false;
+        state.phase3History = [];
+
+        const alwaysVis = isAlwaysVisibleVisualPhase(state.currentPhase);
+        state.showVisualAid = alwaysVis;
+        state.visualFromMistake = false;
+        state.visualIsAfter = false;
+        state.visualStepOverride = null;
+
+        document.getElementById("tableToggleBtn").classList.remove("pulse-hint");
+        render();
+      }
+
+      // Mistake & Point Tracking
+      function recordMistake(message, suggestTable = false) {
+        state.scores[state.currentPhase] = Math.max(0, state.scores[state.currentPhase] - 1);
+        state.consecutiveMistakes += 1;
+
+        // In Phases 3 and 6, automatically pop open the visual aid on an error
+        if (!state.showVisualAid) {
+          const drafts = captureInputDrafts();
+          state.showVisualAid = true;
+          state.visualFromMistake = true;
+          state.visualIsAfter = false;
+          render();
+          restoreInputDrafts(drafts);
+        } else {
+          renderTopBar();
+          updateScoreDisplay();
+        }
+
+        if (suggestTable) {
+          document.getElementById("tableToggleBtn").classList.add("pulse-hint");
+        }
+
+        showFeedback(message, suggestTable ? "table-warn" : "error");
+
+        if (state.consecutiveMistakes > LOCK_CONSECUTIVE_LIMIT) {
+          triggerFreeze();
+        }
+      }
+
+      function recordCorrectPoint(message) {
+        state.consecutiveMistakes = 0;
+        state.questionSolved = true;
+        document.getElementById("tableToggleBtn").classList.remove("pulse-hint");
+
+        if (state.scores[state.currentPhase] < TARGET_SCORE) {
+          state.scores[state.currentPhase] += 1;
+        }
+
+        if (state.scores[state.currentPhase] >= TARGET_SCORE && state.unlockedPhase === state.currentPhase && state.currentPhase < PHASES.length - 1) {
+          state.unlockedPhase = state.currentPhase + 1;
+        }
+
+        renderTopBar();
+        updateScoreDisplay();
+        showFeedback(message, "success");
+
+        // Auto-play the visual animation to "Efter" when the student solves the task!
+        if (state.showVisualAid) {
+          triggerVisualAfter(false);
+        }
+      }
+
+      // Render Top Two-Row Navigation Bar (2 rows of 3 = 6 phases)
+      function renderTopBar() {
+        const nav = document.getElementById("phaseNav");
+        nav.innerHTML = PHASES.map((p) => {
+          const isUnlocked = state.teacherMode || p.id <= state.unlockedPhase;
+          const isActive = p.id === state.currentPhase;
+          const isCompleted = state.scores[p.id] >= TARGET_SCORE;
+          const classes = ["phase-pill"];
+          if (isActive) classes.push("active");
+          if (isCompleted) classes.push("completed");
+
+          const icon = isCompleted ? "✓" : (!isUnlocked ? "🔒" : "");
+          return `
+            <button
+              type="button"
+              class="${classes.join(" ")}"
+              data-phase="${p.id}"
+              ${!isUnlocked ? "disabled" : ""}
+              title="${p.title}"
+            >
+              <span>${icon ? icon + " " : ""}${p.shortName}</span>
+              <span class="pill-score">${state.scores[p.id]}/${TARGET_SCORE}</span>
+            </button>
+          `;
+        }).join("");
+
+        nav.querySelectorAll(".phase-pill").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            if (isScreenLocked()) return;
+            const targetId = Number(btn.dataset.phase);
+            if (state.teacherMode || targetId <= state.unlockedPhase) {
+              state.currentPhase = targetId;
+              loadNewQuestion();
+            }
+          });
+        });
+
+        const badge = document.getElementById("teacherBadge");
+        badge.classList.toggle("show", state.teacherMode);
+      }
+
+      function updateScoreDisplay() {
+        const score = state.scores[state.currentPhase];
+        const dotsEl = document.getElementById("progressDots");
+        const labelEl = document.getElementById("scoreLabel");
+        if (dotsEl) {
+          let dotsHTML = "";
+          for (let i = 0; i < TARGET_SCORE; i++) {
+            dotsHTML += `<span class="dot ${i < score ? "filled" : ""}"></span>`;
+          }
+          dotsEl.innerHTML = dotsHTML;
+        }
+        if (labelEl) {
+          labelEl.textContent = `${score} / ${TARGET_SCORE} poäng`;
+        }
+      }
+
+      function showFeedback(text, type) {
+        const box = document.getElementById("feedbackBox");
+        if (!box) return;
+        box.className = `feedback-box show ${type}`;
+        box.innerHTML = `<span>${text}</span>`;
+      }
+
+      function hideFeedback() {
+        const box = document.getElementById("feedbackBox");
+        if (!box) return;
+        box.className = "feedback-box";
+        box.innerHTML = "";
+      }
+
+      function wrapInTwoColIfVisual(workInnerHTML, q) {
+        if (!state.showVisualAid) {
+          return `<div class="work-col">${workInnerHTML}</div>`;
+        }
+        return `
+          <div class="two-col-workspace">
+            <div class="visual-col">
+              ${buildVisualPanelHTML(q)}
+            </div>
+            <div class="work-col">
+              ${workInnerHTML}
+            </div>
+          </div>
+        `;
+      }
+
+      // Main Card Rendering
+      function render() {
+        renderTopBar();
+        const card = document.getElementById("mainCard");
+        const phase = PHASES[state.currentPhase];
+        const score = state.scores[state.currentPhase];
+        const q = state.question;
+
+        let dotsHTML = "";
+        for (let i = 0; i < TARGET_SCORE; i++) {
+          dotsHTML += `<span class="dot ${i < score ? "filled" : ""}"></span>`;
+        }
+
+        const headerHTML = `
+          <div class="card-top">
+            <div>
+              <h1 class="phase-heading">${phase.title}</h1>
+              <p class="phase-sub">${phase.desc}</p>
+            </div>
+            <div class="progress-box">
+              <div class="dots" id="progressDots">${dotsHTML}</div>
+              <div class="score-label" id="scoreLabel">${score} / ${TARGET_SCORE} poäng</div>
+            </div>
+          </div>
+        `;
+
+        // Phase completed screen
+        if (score >= TARGET_SCORE && state.questionSolved) {
+          const isLastPhase = state.currentPhase === PHASES.length - 1;
+          card.innerHTML = `
+            ${headerHTML}
+            <div class="complete-panel">
+              <h2>${isLastPhase ? "Alla 6 faser är klara!" : `${phase.shortName} avklarad (${TARGET_SCORE}/${TARGET_SCORE})!`}</h2>
+              <p>
+                ${isLastPhase
+                  ? "Snyggt jobbat! Du har klarat alla 6 faser av att förkorta och förlänga bråk."
+                  : `Du har samlat ihop ${TARGET_SCORE} poäng och låst upp nästa fas.`}
+              </p>
+              <div style="display:flex; gap:12px; margin-top:4px;">
+                ${!isLastPhase
+                  ? `<button type="button" class="btn-primary" id="nextPhaseBtn">Gå till ${PHASES[state.currentPhase + 1].shortName} →</button>`
+                  : `<button type="button" class="btn-outline" id="practiceMoreBtn">Öva fler uppgifter i denna fas</button>`}
+              </div>
+            </div>
+          `;
+
+          document.getElementById("nextPhaseBtn")?.addEventListener("click", () => {
+            if (isScreenLocked()) return;
+            state.currentPhase += 1;
+            loadNewQuestion();
+          });
+          document.getElementById("practiceMoreBtn")?.addEventListener("click", () => {
+            if (isScreenLocked()) return;
+            loadNewQuestion();
+          });
+          return;
+        }
+
+        // Phase 1: Concept Multiple Choice (2-Column with always-visible animation)
+        if (q.type === "concept") {
+          const workHTML = `
+            <div class="prompt-banner">${q.prompt}</div>
+            ${q.showcaseHTML ? `<div class="concept-showcase">${q.showcaseHTML}</div>` : ""}
+            <div class="choices-row" id="choicesRow">
+              ${q.choices.map((c) => `
+                <button type="button" class="choice-btn" data-cid="${c.id}">
+                  <div>${c.html}</div>
+                </button>
+              `).join("")}
+            </div>
+            <div class="feedback-box" id="feedbackBox"></div>
+          `;
+
+          card.innerHTML = `
+            ${headerHTML}
+            ${wrapInTwoColIfVisual(workHTML, q)}
+            <div class="action-row">
+              <span class="rule-reminder">Kom ihåg: Gör alltid samma sak med täljare och nämnare.</span>
+              <button type="button" class="btn-primary" id="nextQuestionBtn" style="display:none;">Nästa uppgift →</button>
+            </div>
+          `;
+
+          wireVisualControls();
+
+          const btns = card.querySelectorAll(".choice-btn");
+          btns.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              if (isScreenLocked() || state.questionSolved) return;
+              const cid = btn.dataset.cid;
+              const chosen = q.choices.find((c) => c.id === cid);
+              if (!chosen) return;
+
+              if (chosen.correct) {
+                btn.classList.add("correct-pick");
+                btns.forEach((b) => (b.disabled = true));
+                recordCorrectPoint(q.explanation);
+                if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+                  setTimeout(render, 850);
+                } else {
+                  document.getElementById("nextQuestionBtn").style.display = "inline-block";
+                }
+              } else {
+                btn.classList.add("wrong-pick");
+                btn.disabled = true;
+                recordMistake("Inte riktigt. Titta noga på om täljare och nämnare delas eller multipliceras med samma tal (-1 poäng).", false);
+              }
+            });
+          });
+
+          document.getElementById("nextQuestionBtn").addEventListener("click", loadNewQuestion);
+          return;
+        }
+
+        // Phases 2, 3, 4, 5, 6: Välj räknesätt (· or /) above ? badges + Intermediate Step + Resulting Fraction
+        const opChar = state.opVerified ? (state.selectedOp === "mult" ? "·" : "/") : "?";
+        const opClass = state.opVerified ? "op-badge" : "op-badge unset";
+
+        const multBtnClass = ["op-btn"];
+        if (state.opVerified && state.selectedOp === "mult") multBtnClass.push("op-correct");
+        if (state.wrongOpTried === "mult") multBtnClass.push("op-wrong");
+
+        const divBtnClass = ["op-btn"];
+        if (state.opVerified && state.selectedOp === "div") divBtnClass.push("op-correct");
+        if (state.wrongOpTried === "div") divBtnClass.push("op-wrong");
+
+        const inputsLockedPreOp = !state.opVerified;
+
+        const historyHTML = state.phase3History.length > 0
+          ? `<div class="step-history">
+              <span>Tidigare steg:</span>
+              ${state.phase3History.map((h) => `
+                ${fracHTML(h.fromN, h.fromD, "sm")} <span>=</span> ${stepFracHTML(h.fromN, "/", h.k, h.fromD, "sm")} <span>=</span> ${fracHTML(h.toN, h.toD, "sm")}
+              `).join(" <span style='margin:0 4px'>→</span> ")}
+            </div>`
+          : "";
+
+        const workHTML = `
+          <div class="prompt-banner">${q.prompt}</div>
+          ${historyHTML}
+
+          <div class="equation-area">
+            <!-- Original / Current Fraction -->
+            <div class="eq-frac-slot">
+              ${fracHTML(q.curNum, q.curDen, "lg")}
+            </div>
+
+            <div class="eq-sign">=</div>
+
+            <!-- Middle Column: Välj räknesätt directly above the ? badges -->
+            <div class="middle-step-col">
+              <div class="op-selector-above">
+                <span class="op-selector-label">Välj räknesätt</span>
+                <div class="op-btn-group">
+                  <button type="button" class="${multBtnClass.join(" ")}" id="btnOpMult" aria-label="Multiplikation" ${state.opVerified ? "disabled" : ""}>·</button>
+                  <button type="button" class="${divBtnClass.join(" ")}" id="btnOpDiv" aria-label="Division" ${state.opVerified ? "disabled" : ""}>/</button>
+                </div>
+              </div>
+
+              <div class="eq-frac-slot">
+                <div class="frac frac-lg">
+                  <div class="frac-num">
+                    <span class="prefilled-val">${q.curNum}</span>
+                    <span class="${opClass}" id="opTopBadge">${opChar}</span>
+                    <input type="number" inputmode="numeric" class="num-input ${inputsLockedPreOp ? "locked-pre-op" : ""}" id="stepNumInput" ${inputsLockedPreOp ? "disabled" : ""} aria-label="Tal att räkna med i täljaren" />
+                  </div>
+                  <div class="frac-bar"></div>
+                  <div class="frac-den">
+                    <span class="prefilled-val">${q.curDen}</span>
+                    <span class="${opClass}" id="opDenBadge">${opChar}</span>
+                    <input type="number" inputmode="numeric" class="num-input ${inputsLockedPreOp ? "locked-pre-op" : ""}" id="stepDenInput" ${inputsLockedPreOp ? "disabled" : ""} aria-label="Tal att räkna med i nämnaren" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="eq-sign">=</div>
+
+            <!-- Resulting Fraction -->
+            <div class="eq-frac-slot">
+              <div class="frac frac-lg">
+                <div class="frac-num">
+                  <input type="number" inputmode="numeric" class="num-input ${inputsLockedPreOp ? "locked-pre-op" : ""}" id="resNumInput" ${inputsLockedPreOp ? "disabled" : ""} aria-label="Ny täljare" />
+                </div>
+                <div class="frac-bar"></div>
+                <div class="frac-den">
+                  <input type="number" inputmode="numeric" class="num-input ${inputsLockedPreOp ? "locked-pre-op" : ""}" id="resDenInput" ${inputsLockedPreOp ? "disabled" : ""} aria-label="Ny nämnare" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simplification Final Decision Box (hidden until intermediate step is verified) -->
+          <div class="simplify-decision" id="simplifyDecisionBox" style="display:none;">
+            <div class="decision-prompt" id="decisionPromptText"></div>
+            <div class="decision-btns">
+              <button type="button" class="btn-outline" id="btnSimplifyAgain">Förkorta en gång till</button>
+              <button type="button" class="btn-emerald" id="btnFinalAnswer">Detta är mitt slutgiltiga svar</button>
+            </div>
+          </div>
+
+          <div class="feedback-box" id="feedbackBox"></div>
+        `;
+
+        card.innerHTML = `
+          ${headerHTML}
+          ${wrapInTwoColIfVisual(workHTML, q)}
+          <div class="action-row">
+            <span class="rule-reminder" id="ruleReminderText">
+              ${inputsLockedPreOp
+                ? "Steg 1: Välj rätt räknesätt ( · eller / ) ovanför frågetecknen."
+                : "Steg 2: Skriv samma tal i båda rutorna i mellanledet och räkna ut svaret."}
+            </span>
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="btn-primary" id="checkBtn" ${inputsLockedPreOp ? "disabled" : ""}>Rätta svar</button>
+              <button type="button" class="btn-primary" id="nextQuestionBtn" style="display:none;">Nästa uppgift →</button>
+            </div>
+          </div>
+        `;
+
+        wireVisualControls();
+
+        // Immediate verification when clicking · or /
+        const btnMult = document.getElementById("btnOpMult");
+        const btnDiv = document.getElementById("btnOpDiv");
+        const topBadge = document.getElementById("opTopBadge");
+        const denBadge = document.getElementById("opDenBadge");
+
+        function handleOpSelection(chosenOp) {
+          if (isScreenLocked() || state.questionSolved || state.awaitingFinalDecision || state.opVerified) return;
+
+          if (chosenOp === q.expectedOp) {
+            state.selectedOp = chosenOp;
+            state.opVerified = true;
+            state.wrongOpTried = null;
+
+            const symbol = chosenOp === "mult" ? "·" : "/";
+            topBadge.textContent = symbol;
+            denBadge.textContent = symbol;
+            topBadge.classList.remove("unset");
+            denBadge.classList.remove("unset");
+
+            btnMult.classList.remove("op-wrong");
+            btnDiv.classList.remove("op-wrong");
+            if (chosenOp === "mult") {
+              btnMult.classList.add("op-correct");
+            } else {
+              btnDiv.classList.add("op-correct");
+            }
+            btnMult.disabled = true;
+            btnDiv.disabled = true;
+
+            hideFeedback();
+
+            ["stepNumInput", "stepDenInput", "resNumInput", "resDenInput"].forEach((id) => {
+              const el = document.getElementById(id);
+              if (el) {
+                el.disabled = false;
+                el.classList.remove("locked-pre-op");
+              }
+            });
+
+            const checkBtn = document.getElementById("checkBtn");
+            if (checkBtn) checkBtn.disabled = false;
+
+            const reminder = document.getElementById("ruleReminderText");
+            if (reminder) {
+              reminder.textContent = "Steg 2: Skriv samma tal i båda rutorna i mellanledet och räkna ut svaret.";
+            }
+
+            document.getElementById("stepNumInput")?.focus();
+          } else {
+            state.wrongOpTried = chosenOp;
+            if (chosenOp === "mult") {
+              btnMult.classList.add("op-wrong");
+            } else {
+              btnDiv.classList.add("op-wrong");
+            }
+
+            const errMsg = q.expectedOp === "div"
+              ? "Inte riktigt! När du ska förkorta bråket delar du täljare och nämnare – välj division ( / ) för att gå vidare (-1 poäng)."
+              : "Inte riktigt! När du ska förlänga bråket multiplicerar du täljare och nämnare – välj multiplikation ( · ) för att gå vidare (-1 poäng).";
+
+            recordMistake(errMsg, false);
+          }
+        }
+
+        btnMult.addEventListener("click", () => handleOpSelection("mult"));
+        btnDiv.addEventListener("click", () => handleOpSelection("div"));
+
+        // Wire up Check button
+        document.getElementById("checkBtn").addEventListener("click", handleStepCheck);
+        document.getElementById("nextQuestionBtn").addEventListener("click", loadNewQuestion);
+      }
+
+      function lockStepInputsSolved() {
+        ["stepNumInput", "stepDenInput", "resNumInput", "resDenInput"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.disabled = true;
+            el.classList.add("locked-solved");
+          }
+        });
+      }
+
+      function handleStepCheck() {
+        if (isScreenLocked() || state.questionSolved || state.awaitingFinalDecision || !state.opVerified) return;
+
+        const q = state.question;
+        const stepNumRaw = document.getElementById("stepNumInput").value.trim();
+        const stepDenRaw = document.getElementById("stepDenInput").value.trim();
+        const resNumRaw = document.getElementById("resNumInput").value.trim();
+        const resDenRaw = document.getElementById("resDenInput").value.trim();
+
+        // 1. Check that all 4 inputs are filled
+        if (stepNumRaw === "" || stepDenRaw === "" || resNumRaw === "" || resDenRaw === "") {
+          showFeedback("Fyll i alla fyra rutorna – både mellanledet och svaret – innan du rättar.", "error");
+          return;
+        }
+
+        const stepNum = Number(stepNumRaw);
+        const stepDen = Number(stepDenRaw);
+        const resNum = Number(resNumRaw);
+        const resDen = Number(resDenRaw);
+
+        // 2. Emphasize doing the EXACT SAME thing to täljare and nämnare
+        if (stepNum !== stepDen) {
+          recordMistake("Du måste göra samma sak i täljaren och nämnaren! Skriv samma tal i båda rutorna i mellanledet (-1 poäng).", false);
+          return;
+        }
+
+        const k = stepNum;
+        const expectsDiv = q.expectedOp === "div";
+
+        // 3. Phase-specific factor / divisor checks
+        if (q.mode === "div_given" && k !== q.givenFactor) {
+          recordMistake(`Uppgiften ber dig att förkorta med ${q.givenFactor}. Skriv ${q.givenFactor} vid både täljaren och nämnaren (-1 poäng).`, false);
+          return;
+        }
+
+        if (q.mode === "mult_given" && k !== q.givenFactor) {
+          recordMistake(`Uppgiften ber dig att förlänga med ${q.givenFactor}. Skriv ${q.givenFactor} vid både täljaren och nämnaren (-1 poäng).`, false);
+          return;
+        }
+
+        if (q.mode === "div_simplest") {
+          if (!Number.isInteger(k) || k <= 1) {
+            recordMistake("Välj ett heltal större än 1 som går jämnt ut i både täljaren och nämnaren (-1 poäng).", false);
+            return;
+          }
+          if (q.curNum % k !== 0 || q.curDen % k !== 0) {
+            recordMistake(
+              `Talet ${k} går inte jämnt ut i både ${q.curNum} och ${q.curDen}. Öppna multiplikationstabellen längst upp, leta upp ${q.curNum} och ${q.curDen} i samma kolumn och läs av vilket tal de är delbara med (-1 poäng).`,
+              true
+            );
+            return;
+          }
+        }
+
+        if (q.mode === "mult_target") {
+          if (!Number.isInteger(k) || k <= 1 || q.curDen * k !== q.targetDen) {
+            recordMistake(
+              `Nämnaren ska bli ${q.targetDen}, men ${q.curDen} · ${k} blir ${q.curDen * k}. Kontrollera i multiplikationstabellen vilket tal som ger ${q.targetDen} (-1 poäng).`,
+              true
+            );
+            return;
+          }
+        }
+
+        // 4. Check arithmetic calculation of resulting numerator & denominator
+        const expectedNum = expectsDiv ? q.curNum / k : q.curNum * k;
+        const expectedDen = expectsDiv ? q.curDen / k : q.curDen * k;
+
+        if (resNum !== expectedNum || resDen !== expectedDen) {
+          const tableHint = expectsDiv
+            ? `Mellanledet stämmer, men divisionen i svaret blev fel. Kontrollera i multiplikationstabellen: börja vid ${k} i översta raden, dra nedåt till ${q.curNum} (och ${q.curDen}) och läs av svaret till vänster (-1 poäng)!`
+            : `Mellanledet stämmer, men multiplikationen i svaret blev fel. Ta hjälp av multiplikationstabellen längst upp för att kontrollera ${q.curNum} · ${k} och ${q.curDen} · ${k} (-1 poäng)!`;
+          recordMistake(tableHint, true);
+          return;
+        }
+
+        // 5. Everything in the step & result is correct!
+        if (q.mode === "div_simplest") {
+          state.awaitingFinalDecision = true;
+          lockStepInputsSolved();
+          hideFeedback();
+          document.getElementById("checkBtn").style.display = "none";
+
+          // If the visual aid is open (from an earlier mistake), sync it to this step and auto-play it
+          if (state.showVisualAid) {
+            state.visualStepOverride = {
+              op: "div",
+              fromN: q.curNum,
+              fromD: q.curDen,
+              factor: k
+            };
+            const drafts = captureInputDrafts();
+            state.visualIsAfter = false;
+            render();
+            restoreInputDrafts(drafts);
+            lockStepInputsSolved();
+            document.getElementById("checkBtn").style.display = "none";
+            triggerVisualAfter(false);
+          }
+
+          const decisionBox = document.getElementById("simplifyDecisionBox");
+          const promptText = document.getElementById("decisionPromptText");
+          promptText.innerHTML = `Bra steg! Kan bråket ${fracHTML(expectedNum, expectedDen, "sm")} förkortas mer, eller är detta ditt slutgiltiga svar?`;
+          decisionBox.style.display = "flex";
+
+          const canSimplifyMore = gcd(expectedNum, expectedDen) > 1;
+
+          document.getElementById("btnSimplifyAgain").onclick = () => {
+            if (isScreenLocked()) return;
+            if (!canSimplifyMore) {
+              recordMistake(
+                `Bråket ${expectedNum} och ${expectedDen} har inget gemensamt tal (större än 1) att dela med längre – det går inte att förkorta mer (-1 poäng). Klicka på "Detta är mitt slutgiltiga svar"!`,
+                true
+              );
+              return;
+            }
+            state.phase3History.push({
+              fromN: q.curNum,
+              fromD: q.curDen,
+              k: k,
+              toN: expectedNum,
+              toD: expectedDen
+            });
+            q.curNum = expectedNum;
+            q.curDen = expectedDen;
+            state.selectedOp = null;
+            state.opVerified = false;
+            state.wrongOpTried = null;
+            state.awaitingFinalDecision = false;
+            state.visualStepOverride = null;
+            state.visualIsAfter = false;
+            render();
+          };
+
+          document.getElementById("btnFinalAnswer").onclick = () => {
+            if (isScreenLocked()) return;
+            if (canSimplifyMore) {
+              recordMistake(
+                `Inte riktigt klart! Både ${expectedNum} och ${expectedDen} kan förkortas ännu mer. Klicka på "Förkorta en gång till" och använd multiplikationstabellen om du behöver hjälp (-1 poäng).`,
+                true
+              );
+              return;
+            }
+            decisionBox.style.display = "none";
+            recordCorrectPoint("Helt rätt! Bråket är förkortat så långt som möjligt (+1 poäng).");
+            if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+              setTimeout(render, 850);
+            } else {
+              document.getElementById("nextQuestionBtn").style.display = "inline-block";
+            }
+          };
+          return;
+        }
+
+        // Standard phases (2, 4, 5, and non-simplest in 6)
+        lockStepInputsSolved();
+        document.getElementById("checkBtn").style.display = "none";
+        const successMsg = expectsDiv
+          ? "Snyggt! Du dividerade både täljaren och nämnaren med samma tal (+1 poäng)."
+          : "Snyggt! Du multiplicerade både täljaren och nämnaren med samma tal (+1 poäng).";
+        recordCorrectPoint(successMsg);
+
+        if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+          setTimeout(render, 850);
+        } else {
+          document.getElementById("nextQuestionBtn").style.display = "inline-block";
+        }
+      }
+
+      // Global Event Listeners: Times Table, Enter Key, and Teacher Shortcuts
+      document.getElementById("tableToggleBtn").addEventListener("click", (e) => {
+        if (isScreenLocked()) return;
+        e.stopPropagation();
+        const isOpen = document.getElementById("timesDropdown").classList.contains("open");
+        setTableOpen(!isOpen);
+      });
+
+      document.getElementById("tableCloseBtn").addEventListener("click", () => setTableOpen(false));
+
+      document.addEventListener("click", (e) => {
+        const wrap = document.querySelector(".table-toggle-wrap");
+        if (wrap && !wrap.contains(e.target)) {
+          setTableOpen(false);
+        }
+      });
+
+      document.getElementById("teacherUnfreezeBtn").addEventListener("click", unfreezeApp);
+
+      document.addEventListener("keydown", (e) => {
+        // Teacher shortcut: Shift + L
+        if (e.shiftKey && (e.key === "L" || e.key === "l")) {
+          e.preventDefault();
+          if (isScreenLocked()) {
+            unfreezeApp();
+            return;
+          }
+          state.teacherMode = !state.teacherMode;
+          if (state.teacherMode) {
+            state.unlockedPhase = PHASES.length - 1;
+          }
+          renderTopBar();
+          return;
+        }
+
+        if (isScreenLocked()) {
+          e.preventDefault();
+          return;
+        }
+
+        // Skip question shortcut: Shift + F
+        if (e.shiftKey && (e.key === "F" || e.key === "f")) {
+          e.preventDefault();
+          loadNewQuestion();
+          return;
+        }
+
+        // Enter key to check or move to next question
+        if (e.key === "Enter") {
+          const activeId = document.activeElement ? document.activeElement.id : "";
+          if (
+            activeId === "btnVisualBefore" ||
+            activeId === "btnVisualAfter" ||
+            activeId === "btnVisualReplay"
+          ) {
+            return;
+          }
+          const nextBtn = document.getElementById("nextQuestionBtn");
+          if (nextBtn && nextBtn.style.display !== "none") {
+            e.preventDefault();
+            loadNewQuestion();
+            return;
+          }
+          const checkBtn = document.getElementById("checkBtn");
+          if (checkBtn && checkBtn.style.display !== "none" && !checkBtn.disabled && !state.awaitingFinalDecision) {
+            e.preventDefault();
+            handleStepCheck();
+          }
+        }
+      });
+
+      // Initialize
+      buildTimesTable();
+      loadNewQuestion();
+    })();
+  </script>
+</body>
+</html>
