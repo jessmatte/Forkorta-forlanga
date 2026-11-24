@@ -65,11 +65,11 @@
       letter-spacing: -0.01em;
     }
 
-    /* Two-Row Phase Bar (2 rows of 3 = 6 phases) */
+    /* Single-Row Phase Bar (4 phases) */
     .phase-bar-wrap {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 6px 18px;
+      padding: 7px 18px;
       flex-shrink: 0;
       z-index: 25;
     }
@@ -78,8 +78,14 @@
       max-width: 1060px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 5px 10px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .phase-nav {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .phase-pill {
@@ -87,7 +93,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 5px 12px;
+      padding: 6px 12px;
       border-radius: 9px;
       border: 1.5px solid var(--border);
       background: var(--surface-muted);
@@ -288,7 +294,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 18px;
+      padding: 10px 18px;
       overflow-y: auto;
     }
 
@@ -299,7 +305,7 @@
       border: 1px solid var(--border);
       border-radius: 16px;
       box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
-      padding: 14px 22px;
+      padding: 15px 22px;
       display: flex;
       flex-direction: column;
       gap: 11px;
@@ -568,7 +574,7 @@
     }
 
     .frac-md {
-      font-size: 1.22rem;
+      font-size: 1.18rem;
     }
 
     .frac-lg {
@@ -599,15 +605,49 @@
       gap: 5px;
     }
 
-    /* Instruction Prompt */
+    /* Instruction Prompt & Callouts */
     .prompt-banner {
-      font-size: 1.01rem;
+      font-size: 1.02rem;
       font-weight: 600;
       color: var(--text);
       display: flex;
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .info-callout {
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      color: #1e1b4b;
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 0.81rem;
+      line-height: 1.4;
+    }
+
+    .tumregel-callout {
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      color: #78350f;
+      padding: 7px 12px;
+      border-radius: 9px;
+      font-size: 0.81rem;
+      line-height: 1.4;
+    }
+
+    .notebook-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border-strong);
+      color: var(--text-muted);
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      align-self: flex-start;
     }
 
     .step-history {
@@ -623,7 +663,7 @@
       color: #065f46;
     }
 
-    /* Equation Builder Workspace (Phases 2-6) */
+    /* Equation Builder Workspace */
     .equation-area {
       display: flex;
       align-items: flex-end;
@@ -634,6 +674,12 @@
       border: 1px solid var(--border);
       border-radius: 13px;
       flex-wrap: wrap;
+    }
+
+    .equation-area.direct-mode {
+      align-items: center;
+      padding: 18px 16px;
+      gap: 18px;
     }
 
     .eq-frac-slot {
@@ -778,8 +824,8 @@
     }
 
     .num-input {
-      width: 52px;
-      height: 35px;
+      width: 54px;
+      height: 36px;
       border: 2px solid var(--border-strong);
       border-radius: 8px;
       background: #ffffff;
@@ -821,66 +867,7 @@
       -moz-appearance: textfield;
     }
 
-    /* Phase 1 Concept Choice Cards */
-    .concept-showcase {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 10px 14px;
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-    }
-
-    .choices-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .choice-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 11px 10px;
-      border-radius: 11px;
-      border: 2px solid var(--border-strong);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 0.91rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      min-height: 68px;
-      text-align: center;
-    }
-
-    .choice-btn:hover:not(:disabled) {
-      border-color: var(--primary);
-      background: var(--primary-soft);
-      color: var(--primary);
-    }
-
-    .choice-btn.correct-pick {
-      border-color: var(--emerald);
-      background: var(--emerald-soft);
-      color: #065f46;
-    }
-
-    .choice-btn.wrong-pick {
-      border-color: var(--rose);
-      background: var(--rose-soft);
-      color: #9f1239;
-    }
-
-    .choice-btn:disabled {
-      cursor: default;
-    }
-
-    /* Phase 3 Final Decision Box */
+    /* Simplification Final Decision Box */
     .simplify-decision {
       background: var(--primary-soft);
       border: 1.5px solid var(--primary-border);
@@ -907,6 +894,76 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+    }
+
+    /* Chained Simplification Follow-Up Box (Fas 2) */
+    .followup-box {
+      background: var(--primary-soft);
+      border: 1.5px solid var(--primary-border);
+      border-radius: 11px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .followup-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .followup-prompt {
+      font-size: 0.89rem;
+      font-weight: 600;
+      color: #1e1b4b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .followup-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .followup-hint {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: #92400e;
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    .followup-shortcut {
+      background: #ffffff;
+      border: 1px solid var(--emerald-border);
+      border-radius: 9px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: #065f46;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .followup-eq {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--emerald-soft);
+      padding: 4px 10px;
+      border-radius: 8px;
+      color: #065f46;
     }
 
     /* Feedback Banner & Controls */
@@ -1178,7 +1235,7 @@
     </div>
   </header>
 
-  <!-- Two-Row Phase Bar (2 rows of 3 = 6 phases) -->
+  <!-- Single-Row Phase Bar (4 phases) -->
   <div class="phase-bar-wrap">
     <nav class="phase-nav" id="phaseNav" aria-label="Faser"></nav>
   </div>
@@ -1212,44 +1269,30 @@
       const PHASES = [
         {
           id: 0,
-          shortName: "1. Begrepp",
-          title: "Fas 1: Förkorta och förlänga",
-          desc: "Känn igen vad som händer med täljare och nämnare.",
-          subtypes: ["id_div", "id_mult", "pick_mult", "pick_div"]
+          shortName: "1. Förkorta & förläng",
+          title: "Fas 1: Förkorta och förläng med ett givet tal",
+          desc: "Välj / när du förkortar och · när du förlänger, och räkna med samma tal i täljare och nämnare.",
+          subtypes: ["div_2", "mult_2", "div_3", "mult_3", "div_4", "mult_4", "div_5", "mult_5"]
         },
         {
           id: 1,
-          shortName: "2. Förkorta",
-          title: "Fas 2: Förkorta med ett givet tal",
-          desc: "Välj / och dividera både täljaren och nämnaren med samma tal.",
-          subtypes: ["div_2", "div_3", "div_4", "div_5"]
-        },
-        {
-          id: 2,
-          shortName: "3. Enklaste form",
-          title: "Fas 3: Så liten nämnare som möjligt",
+          shortName: "2. Enklaste form",
+          title: "Fas 2: Så liten nämnare som möjligt",
           desc: "Välj själv ett tal att förkorta med tills bråket inte går att förkorta mer.",
           subtypes: ["one_step", "multi_step"]
         },
         {
-          id: 3,
-          shortName: "4. Förläng",
-          title: "Fas 4: Förläng med ett givet tal",
-          desc: "Välj · och multiplicera både täljaren och nämnaren med samma tal.",
-          subtypes: ["mult_2", "mult_3", "mult_4", "mult_5", "mult_6"]
-        },
-        {
-          id: 4,
-          shortName: "5. Ny nämnare",
-          title: "Fas 5: Förläng till bestämd nämnare",
+          id: 2,
+          shortName: "3. Ny nämnare",
+          title: "Fas 3: Förläng till bestämd nämnare",
           desc: "Ta reda på vilket tal nämnaren ska multipliceras med.",
           subtypes: ["group_10_20", "group_12_16_18_24", "group_15_30", "group_100"]
         },
         {
-          id: 5,
-          shortName: "6. Blandat",
-          title: "Fas 6: Blandade uppgifter",
-          desc: "Avgör själv om du ska förkorta ( / ) eller förlänga ( · ) och lös uppgiften.",
+          id: 3,
+          shortName: "4. Direkt",
+          title: "Fas 4: Direkt – räkna i anteckningsboken",
+          desc: "Räkna ut uppgiften i din anteckningsbok och skriv in det färdiga bråket direkt.",
           subtypes: ["div_given", "div_simplest", "mult_given", "mult_target"]
         }
       ];
@@ -1260,22 +1303,29 @@
 
       const state = {
         currentPhase: 0,
-        scores: [0, 0, 0, 0, 0, 0],
+        scores: [0, 0, 0, 0],
         unlockedPhase: 0,
         teacherMode: false,
         consecutiveMistakes: 0,
         lockedUntil: 0,
         lockTimerId: null,
-        subtypeDecks: [[], [], [], [], [], []],
-        subtypeHistory: [[], [], [], [], [], []],
+        subtypeDecks: [[], [], [], []],
+        subtypeHistory: [[], [], [], []],
         question: null,
         selectedOp: null, // 'mult' or 'div'
-        opVerified: false, // Must be true before filling numbers
+        opVerified: false, // Must be true before filling numbers in step phases
         wrongOpTried: null, // 'mult' or 'div' if wrong button was clicked
         questionSolved: false,
-        awaitingFinalDecision: false, // Phase 3 / mixed div_simplest after valid step
-        phase3History: [],
-        // Visual aid state (always visible in Phases 1, 2, 4, 5; pops up on error in Phases 3, 6)
+        awaitingFinalDecision: false, // Phase 2 after valid step
+        phase2History: [],
+        // Follow-up state when student chains simplifications in Fas 2
+        awaitingFollowUp: false,
+        followUpAnswered: false,
+        followUpBiggest: null,
+        followUpStepsCount: 0,
+        followUpFinalNum: null,
+        followUpFinalDen: null,
+        // Visual aid state (always visible in Phases 1 & 3; pops up on error in Phases 2 & 4)
         showVisualAid: true,
         visualFromMistake: false,
         visualIsAfter: false,
@@ -1311,7 +1361,7 @@
         return copy;
       }
 
-      // Balanced subtype deck picker: even distribution & never repeats a subtype 3 times in a row
+      // Balanced subtype deck picker: even distribution & never repeats a subtype (or op in Phase 1) 3 times in a row
       function drawBalancedSubtype(phaseIdx) {
         const subtypes = PHASES[phaseIdx].subtypes;
         const history = state.subtypeHistory[phaseIdx];
@@ -1323,12 +1373,23 @@
 
         const last1 = history.length >= 1 ? history[history.length - 1] : null;
         const last2 = history.length >= 2 ? history[history.length - 2] : null;
-        const forbidden = last1 !== null && last1 === last2 ? last1 : null;
+        const forbiddenExact = last1 !== null && last1 === last2 ? last1 : null;
 
-        let pickIdx = deck.findIndex((st) => st !== forbidden);
+        let forbiddenOp = null;
+        if (phaseIdx === 0 && last1 && last2) {
+          const op1 = last1.split("_")[0];
+          const op2 = last2.split("_")[0];
+          if (op1 === op2) forbiddenOp = op1;
+        }
+
+        let pickIdx = deck.findIndex(
+          (st) => st !== forbiddenExact && (!forbiddenOp || st.split("_")[0] !== forbiddenOp)
+        );
         if (pickIdx === -1) {
           deck = shuffle(subtypes);
-          pickIdx = deck.findIndex((st) => st !== forbidden);
+          pickIdx = deck.findIndex(
+            (st) => st !== forbiddenExact && (!forbiddenOp || st.split("_")[0] !== forbiddenOp)
+          );
           if (pickIdx === -1) pickIdx = 0;
         }
 
@@ -1420,9 +1481,6 @@
       function getVisualSpec(q) {
         if (state.visualStepOverride) {
           return state.visualStepOverride;
-        }
-        if (q.type === "concept") {
-          return q.visualSpec;
         }
         if (q.mode === "div_given") {
           return {
@@ -1695,120 +1753,7 @@
       }
 
       // Balanced Dynamic Question Generators
-      function generatePhase1BySubtype(subtype) {
-        let baseDen = randInt(3, 7);
-        let baseNum = randInt(1, baseDen - 1);
-        while (gcd(baseNum, baseDen) !== 1) {
-          baseDen = randInt(3, 7);
-          baseNum = randInt(1, baseDen - 1);
-        }
-        const k = randInt(2, 4);
-        const bigNum = baseNum * k;
-        const bigDen = baseDen * k;
-
-        if (subtype === "id_div") {
-          return {
-            subtype,
-            type: "concept",
-            visualSpec: { op: "div", fromN: bigNum, fromD: bigDen, factor: k },
-            prompt: "Titta på uträkningen nedan. Vad har gjorts med bråket?",
-            showcaseHTML: `
-              ${fracHTML(bigNum, bigDen, "lg")}
-              <span class="eq-sign" style="height:auto">=</span>
-              ${stepFracHTML(bigNum, "/", k, bigDen, "lg")}
-              <span class="eq-sign" style="height:auto">=</span>
-              ${fracHTML(baseNum, baseDen, "lg")}
-            `,
-            choices: shuffle([
-              { id: "ok", html: `Förkortat med ${k}`, correct: true },
-              { id: "w1", html: `Förlängt med ${k}`, correct: false },
-              { id: "w2", html: `Multiplicerat med ${k}`, correct: false }
-            ]),
-            explanation: `Rätt! När vi dividerar ( / ) både täljaren och nämnaren med ${k} förkortar vi bråket med ${k}.`
-          };
-        }
-
-        if (subtype === "id_mult") {
-          return {
-            subtype,
-            type: "concept",
-            visualSpec: { op: "mult", fromN: baseNum, fromD: baseDen, factor: k },
-            prompt: "Titta på uträkningen nedan. Vad har gjorts med bråket?",
-            showcaseHTML: `
-              ${fracHTML(baseNum, baseDen, "lg")}
-              <span class="eq-sign" style="height:auto">=</span>
-              ${stepFracHTML(baseNum, "·", k, baseDen, "lg")}
-              <span class="eq-sign" style="height:auto">=</span>
-              ${fracHTML(bigNum, bigDen, "lg")}
-            `,
-            choices: shuffle([
-              { id: "ok", html: `Förlängt med ${k}`, correct: true },
-              { id: "w1", html: `Förkortat med ${k}`, correct: false },
-              { id: "w2", html: `Dividerat med ${k}`, correct: false }
-            ]),
-            explanation: `Rätt! När vi multiplicerar ( · ) både täljaren och nämnaren med ${k} förlänger vi bråket med ${k}.`
-          };
-        }
-
-        if (subtype === "pick_mult") {
-          const wrongK = k === 2 ? 3 : 2;
-          return {
-            subtype,
-            type: "concept",
-            visualSpec: { op: "mult", fromN: baseNum, fromD: baseDen, factor: k },
-            prompt: `Vilken uträkning visar en korrekt förlängning av ${fracHTML(baseNum, baseDen, "sm")} ?`,
-            showcaseHTML: null,
-            choices: shuffle([
-              {
-                id: "ok",
-                html: `${stepFracHTML(baseNum, "·", k, baseDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, bigDen, "md")}`,
-                correct: true
-              },
-              {
-                id: "w1",
-                html: `${fracHTML(`${baseNum} · ${k}`, baseDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, baseDen, "md")}`,
-                correct: false
-              },
-              {
-                id: "w2",
-                html: `${fracHTML(`${baseNum} · ${k}`, `${baseDen} · ${wrongK}`, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum, baseDen * wrongK, "md")}`,
-                correct: false
-              }
-            ]),
-            explanation: `Rätt! Vid förlängning måste både täljaren och nämnaren multipliceras med exakt samma tal (${k}).`
-          };
-        }
-
-        const wrongK = k === 2 ? 3 : 2;
-        return {
-          subtype,
-          type: "concept",
-          visualSpec: { op: "div", fromN: bigNum, fromD: bigDen, factor: k },
-          prompt: `Vilken uträkning visar en korrekt förkortning av ${fracHTML(bigNum, bigDen, "sm")} ?`,
-          showcaseHTML: null,
-          choices: shuffle([
-            {
-              id: "ok",
-              html: `${stepFracHTML(bigNum, "/", k, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(baseNum, baseDen, "md")}`,
-              correct: true
-            },
-            {
-              id: "w1",
-              html: `${fracHTML(`${bigNum} / ${k}`, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(baseNum, bigDen, "md")}`,
-              correct: false
-            },
-            {
-              id: "w2",
-              html: `${stepFracHTML(bigNum, "·", wrongK, bigDen, "md")} <span style="margin:0 4px">=</span> ${fracHTML(bigNum * wrongK, bigDen * wrongK, "md")}`,
-              correct: false
-            }
-          ]),
-          explanation: `Rätt! Vid förkortning dividerar ( / ) vi både täljaren och nämnaren med samma tal (${k}).`
-        };
-      }
-
-      function generatePhase2BySubtype(subtype) {
-        const k = Number(subtype.split("_")[1]) || pickRandom([2, 3, 4, 5]);
+      function generateDivGivenByFactor(k, subtype = `div_${k}`) {
         let baseDen, baseNum;
         do {
           baseDen = randInt(2, 7);
@@ -1829,7 +1774,39 @@
         };
       }
 
-      function generatePhase3BySubtype(subtype) {
+      function generateMultGivenByFactor(k, subtype = `mult_${k}`) {
+        let baseDen, baseNum;
+        do {
+          baseDen = randInt(2, 6);
+          baseNum = randInt(1, baseDen - 1);
+        } while (baseDen * k > 30);
+
+        return {
+          subtype,
+          type: "step",
+          mode: "mult_given",
+          expectedOp: "mult",
+          origNum: baseNum,
+          origDen: baseDen,
+          curNum: baseNum,
+          curDen: baseDen,
+          givenFactor: k,
+          prompt: `Förläng bråket med <strong>${k}</strong>.`
+        };
+      }
+
+      // Phase 1: Merged Förkorta & Förläng (given factor)
+      function generatePhase1BySubtype(subtype) {
+        const [op, numStr] = subtype.split("_");
+        const k = Number(numStr) || 2;
+        if (op === "div") {
+          return generateDivGivenByFactor(k, subtype);
+        }
+        return generateMultGivenByFactor(k, subtype);
+      }
+
+      // Phase 2: Enklaste form (mix of 1-step [3, 4, 5, 6] and multi-step [8, 9, 10, 12], all divisible by 2, 3, or 5)
+      function generatePhase2BySubtype(subtype) {
         const multipliers = subtype === "one_step" ? [3, 4, 5, 6] : [8, 9, 10, 12];
         let baseDen, baseNum, k;
         do {
@@ -1852,29 +1829,8 @@
         };
       }
 
-      function generatePhase4BySubtype(subtype) {
-        const k = Number(subtype.split("_")[1]) || pickRandom([2, 3, 4, 5, 6]);
-        let baseDen, baseNum;
-        do {
-          baseDen = randInt(2, 6);
-          baseNum = randInt(1, baseDen - 1);
-        } while (baseDen * k > 30);
-
-        return {
-          subtype,
-          type: "step",
-          mode: "mult_given",
-          expectedOp: "mult",
-          origNum: baseNum,
-          origDen: baseDen,
-          curNum: baseNum,
-          curDen: baseDen,
-          givenFactor: k,
-          prompt: `Förläng bråket med <strong>${k}</strong>.`
-        };
-      }
-
-      function generatePhase5BySubtype(subtype) {
+      // Phase 3: Ny nämnare
+      function generatePhase3BySubtype(subtype) {
         const presetGroups = {
           group_10_20: [
             { baseDen: 2, targetDen: 10 },
@@ -1935,18 +1891,20 @@
         };
       }
 
-      function generatePhase6BySubtype(subtype) {
+      // Phase 4: Direkt (notebook mode - only starting fraction & final answer inputs)
+      function generatePhase4BySubtype(subtype) {
         let q;
         if (subtype === "div_given") {
-          q = generatePhase2BySubtype(pickRandom(PHASES[1].subtypes));
+          q = generateDivGivenByFactor(pickRandom([2, 3, 4, 5]), subtype);
         } else if (subtype === "div_simplest") {
-          q = generatePhase3BySubtype(pickRandom(PHASES[2].subtypes));
+          q = generatePhase2BySubtype(pickRandom(PHASES[1].subtypes));
         } else if (subtype === "mult_given") {
-          q = generatePhase4BySubtype(pickRandom(PHASES[3].subtypes));
+          q = generateMultGivenByFactor(pickRandom([2, 3, 4, 5, 6]), subtype);
         } else {
-          q = generatePhase5BySubtype(pickRandom(PHASES[4].subtypes));
+          q = generatePhase3BySubtype(pickRandom(PHASES[2].subtypes));
         }
         q.subtype = subtype;
+        q.type = "direct";
         return q;
       }
 
@@ -1959,9 +1917,7 @@
           if (phaseIdx === 0) q = generatePhase1BySubtype(subtype);
           else if (phaseIdx === 1) q = generatePhase2BySubtype(subtype);
           else if (phaseIdx === 2) q = generatePhase3BySubtype(subtype);
-          else if (phaseIdx === 3) q = generatePhase4BySubtype(subtype);
-          else if (phaseIdx === 4) q = generatePhase5BySubtype(subtype);
-          else q = generatePhase6BySubtype(subtype);
+          else q = generatePhase4BySubtype(subtype);
           attempts++;
         } while (JSON.stringify(q) === prevSig && attempts < 10);
         return q;
@@ -2036,8 +1992,8 @@
       }
 
       function isAlwaysVisibleVisualPhase(phaseIdx) {
-        // Always visible in Phases 1 (0), 2 (1), 4 (3), and 5 (4); pops up on error in Phases 3 (2) and 6 (5)
-        return phaseIdx === 0 || phaseIdx === 1 || phaseIdx === 3 || phaseIdx === 4;
+        // Always visible in Phases 1 (0) and 3 (2); pops up on error in Phases 2 (1) and 4 (3)
+        return phaseIdx === 0 || phaseIdx === 2;
       }
 
       function loadNewQuestion() {
@@ -2048,7 +2004,13 @@
         state.wrongOpTried = null;
         state.questionSolved = false;
         state.awaitingFinalDecision = false;
-        state.phase3History = [];
+        state.phase2History = [];
+        state.awaitingFollowUp = false;
+        state.followUpAnswered = false;
+        state.followUpBiggest = null;
+        state.followUpStepsCount = 0;
+        state.followUpFinalNum = null;
+        state.followUpFinalDen = null;
 
         const alwaysVis = isAlwaysVisibleVisualPhase(state.currentPhase);
         state.showVisualAid = alwaysVis;
@@ -2058,6 +2020,10 @@
 
         document.getElementById("tableToggleBtn").classList.remove("pulse-hint");
         render();
+
+        if (state.question.type === "direct") {
+          document.getElementById("resNumInput")?.focus();
+        }
       }
 
       // Mistake & Point Tracking
@@ -2065,7 +2031,7 @@
         state.scores[state.currentPhase] = Math.max(0, state.scores[state.currentPhase] - 1);
         state.consecutiveMistakes += 1;
 
-        // In Phases 3 and 6, automatically pop open the visual aid on an error
+        // In Phases 2 and 4, automatically pop open the visual aid on an error
         if (!state.showVisualAid) {
           const drafts = captureInputDrafts();
           state.showVisualAid = true;
@@ -2112,7 +2078,7 @@
         }
       }
 
-      // Render Top Two-Row Navigation Bar (2 rows of 3 = 6 phases)
+      // Render Top Single-Row Navigation Bar (4 phases)
       function renderTopBar() {
         const nav = document.getElementById("phaseNav");
         nav.innerHTML = PHASES.map((p) => {
@@ -2225,16 +2191,16 @@
           </div>
         `;
 
-        // Phase completed screen
-        if (score >= TARGET_SCORE && state.questionSolved) {
+        // Phase completed screen (only shown once any active follow-up question has been answered)
+        if (score >= TARGET_SCORE && state.questionSolved && (!state.awaitingFollowUp || state.followUpAnswered)) {
           const isLastPhase = state.currentPhase === PHASES.length - 1;
           card.innerHTML = `
             ${headerHTML}
             <div class="complete-panel">
-              <h2>${isLastPhase ? "Alla 6 faser är klara!" : `${phase.shortName} avklarad (${TARGET_SCORE}/${TARGET_SCORE})!`}</h2>
+              <h2>${isLastPhase ? "Alla 4 faser är klara!" : `${phase.shortName} avklarad (${TARGET_SCORE}/${TARGET_SCORE})!`}</h2>
               <p>
                 ${isLastPhase
-                  ? "Snyggt jobbat! Du har klarat alla 6 faser av att förkorta och förlänga bråk."
+                  ? "Snyggt jobbat! Du har klarat alla 4 faser av att förkorta och förlänga bråk."
                   : `Du har samlat ihop ${TARGET_SCORE} poäng och låst upp nästa fas.`}
               </p>
               <div style="display:flex; gap:12px; margin-top:4px;">
@@ -2257,18 +2223,34 @@
           return;
         }
 
-        // Phase 1: Concept Multiple Choice (2-Column with always-visible animation)
-        if (q.type === "concept") {
+        // Phase 4: Direkt (Notebook mode - no operator selector, no intermediate step)
+        if (q.type === "direct") {
           const workHTML = `
             <div class="prompt-banner">${q.prompt}</div>
-            ${q.showcaseHTML ? `<div class="concept-showcase">${q.showcaseHTML}</div>` : ""}
-            <div class="choices-row" id="choicesRow">
-              ${q.choices.map((c) => `
-                <button type="button" class="choice-btn" data-cid="${c.id}">
-                  <div>${c.html}</div>
-                </button>
-              `).join("")}
+            <div class="notebook-badge">Räkna ut uppgiften i din anteckningsbok och skriv in svaret nedan.</div>
+
+            <div class="equation-area direct-mode">
+              <!-- Original Fraction -->
+              <div class="eq-frac-slot">
+                ${fracHTML(q.origNum, q.origDen, "lg")}
+              </div>
+
+              <div class="eq-sign">=</div>
+
+              <!-- Resulting Fraction Only -->
+              <div class="eq-frac-slot">
+                <div class="frac frac-lg">
+                  <div class="frac-num">
+                    <input type="number" inputmode="numeric" class="num-input" id="resNumInput" aria-label="Ny täljare" />
+                  </div>
+                  <div class="frac-bar"></div>
+                  <div class="frac-den">
+                    <input type="number" inputmode="numeric" class="num-input" id="resDenInput" aria-label="Ny nämnare" />
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div class="feedback-box" id="feedbackBox"></div>
           `;
 
@@ -2276,43 +2258,21 @@
             ${headerHTML}
             ${wrapInTwoColIfVisual(workHTML, q)}
             <div class="action-row">
-              <span class="rule-reminder">Kom ihåg: Gör alltid samma sak med täljare och nämnare.</span>
-              <button type="button" class="btn-primary" id="nextQuestionBtn" style="display:none;">Nästa uppgift →</button>
+              <span class="rule-reminder">Visa dina uträkningar i anteckningsboken och fyll i det färdiga bråket.</span>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn-primary" id="checkBtn">Rätta svar</button>
+                <button type="button" class="btn-primary" id="nextQuestionBtn" style="display:none;">Nästa uppgift →</button>
+              </div>
             </div>
           `;
 
           wireVisualControls();
-
-          const btns = card.querySelectorAll(".choice-btn");
-          btns.forEach((btn) => {
-            btn.addEventListener("click", () => {
-              if (isScreenLocked() || state.questionSolved) return;
-              const cid = btn.dataset.cid;
-              const chosen = q.choices.find((c) => c.id === cid);
-              if (!chosen) return;
-
-              if (chosen.correct) {
-                btn.classList.add("correct-pick");
-                btns.forEach((b) => (b.disabled = true));
-                recordCorrectPoint(q.explanation);
-                if (state.scores[state.currentPhase] >= TARGET_SCORE) {
-                  setTimeout(render, 850);
-                } else {
-                  document.getElementById("nextQuestionBtn").style.display = "inline-block";
-                }
-              } else {
-                btn.classList.add("wrong-pick");
-                btn.disabled = true;
-                recordMistake("Inte riktigt. Titta noga på om täljare och nämnare delas eller multipliceras med samma tal (-1 poäng).", false);
-              }
-            });
-          });
-
+          document.getElementById("checkBtn").addEventListener("click", handleDirectCheck);
           document.getElementById("nextQuestionBtn").addEventListener("click", loadNewQuestion);
           return;
         }
 
-        // Phases 2, 3, 4, 5, 6: Välj räknesätt (· or /) above ? badges + Intermediate Step + Resulting Fraction
+        // Phases 1, 2, 3: Välj räknesätt (· or /) above ? badges + Intermediate Step + Resulting Fraction
         const opChar = state.opVerified ? (state.selectedOp === "mult" ? "·" : "/") : "?";
         const opClass = state.opVerified ? "op-badge" : "op-badge unset";
 
@@ -2326,10 +2286,17 @@
 
         const inputsLockedPreOp = !state.opVerified;
 
-        const historyHTML = state.phase3History.length > 0
+        let phaseCalloutHTML = "";
+        if (state.currentPhase === 0) {
+          phaseCalloutHTML = `<div class="info-callout"><strong>Varför förkortar och förlänger vi?</strong> Jo, för att kunna skriva <strong>likvärdiga bråk</strong> – alltså bråk som har exakt samma värde men skrivs med olika täljare och nämnare.</div>`;
+        } else if (state.currentPhase === 1) {
+          phaseCalloutHTML = `<div class="tumregel-callout"><strong>Tumregel:</strong> Innan du väljer tal att förkorta med – titta i kolumnerna <strong>2</strong>, <strong>3</strong> och <strong>5</strong> i multiplikationstabellen och kolla om både täljaren och nämnaren är delbara med något av dem.</div>`;
+        }
+
+        const historyHTML = state.phase2History.length > 0
           ? `<div class="step-history">
               <span>Tidigare steg:</span>
-              ${state.phase3History.map((h) => `
+              ${state.phase2History.map((h) => `
                 ${fracHTML(h.fromN, h.fromD, "sm")} <span>=</span> ${stepFracHTML(h.fromN, "/", h.k, h.fromD, "sm")} <span>=</span> ${fracHTML(h.toN, h.toD, "sm")}
               `).join(" <span style='margin:0 4px'>→</span> ")}
             </div>`
@@ -2337,6 +2304,7 @@
 
         const workHTML = `
           <div class="prompt-banner">${q.prompt}</div>
+          ${phaseCalloutHTML}
           ${historyHTML}
 
           <div class="equation-area">
@@ -2397,6 +2365,19 @@
               <button type="button" class="btn-outline" id="btnSimplifyAgain">Förkorta en gång till</button>
               <button type="button" class="btn-emerald" id="btnFinalAnswer">Detta är mitt slutgiltiga svar</button>
             </div>
+          </div>
+
+          <!-- Chained Simplification Follow-Up Box (Fas 2) -->
+          <div class="followup-box" id="followUpBox" style="display:none;">
+            <div class="followup-top">
+              <div class="followup-prompt" id="followUpPromptText"></div>
+              <div class="followup-controls">
+                <input type="number" inputmode="numeric" class="num-input" id="followUpInput" aria-label="Största talet att förkorta med" />
+                <button type="button" class="btn-primary" id="btnCheckFollowUp">Svara</button>
+              </div>
+            </div>
+            <div class="followup-hint" id="followUpHint" style="display:none;"></div>
+            <div class="followup-shortcut" id="followUpShortcut" style="display:none;"></div>
           </div>
 
           <div class="feedback-box" id="feedbackBox"></div>
@@ -2490,7 +2471,13 @@
 
         // Wire up Check button
         document.getElementById("checkBtn").addEventListener("click", handleStepCheck);
-        document.getElementById("nextQuestionBtn").addEventListener("click", loadNewQuestion);
+        document.getElementById("nextQuestionBtn").addEventListener("click", () => {
+          if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+            render();
+          } else {
+            loadNewQuestion();
+          }
+        });
       }
 
       function lockStepInputsSolved() {
@@ -2503,7 +2490,243 @@
         });
       }
 
+      // Chained Simplification Follow-Up Check (Fas 2 - no points deducted on wrong guess)
+      function handleFollowUpCheck() {
+        if (isScreenLocked() || !state.awaitingFollowUp || state.followUpAnswered) return;
+
+        const inputEl = document.getElementById("followUpInput");
+        const hintEl = document.getElementById("followUpHint");
+        const shortcutEl = document.getElementById("followUpShortcut");
+        if (!inputEl) return;
+
+        const raw = inputEl.value.trim();
+        if (raw === "") {
+          hintEl.textContent = "Skriv in ett tal i rutan och klicka på Svara.";
+          hintEl.style.display = "block";
+          inputEl.focus();
+          return;
+        }
+
+        const ans = Number(raw);
+        const biggest = state.followUpBiggest;
+        const q = state.question;
+
+        if (ans === biggest) {
+          state.followUpAnswered = true;
+          inputEl.disabled = true;
+          inputEl.classList.add("locked-solved");
+          const btnCheck = document.getElementById("btnCheckFollowUp");
+          if (btnCheck) btnCheck.style.display = "none";
+          hintEl.style.display = "none";
+
+          shortcutEl.innerHTML = `
+            <span>Rätt! Väljer du det största talet (<strong>${biggest}</strong>) kan du förkorta snabbare i ett enda steg i stället för ${state.followUpStepsCount} steg:</span>
+            <span class="followup-eq">
+              ${fracHTML(q.origNum, q.origDen, "sm")}
+              <span>=</span>
+              ${stepFracHTML(q.origNum, "/", biggest, q.origDen, "sm")}
+              <span>=</span>
+              ${fracHTML(state.followUpFinalNum, state.followUpFinalDen, "sm")}
+            </span>
+          `;
+          shortcutEl.style.display = "flex";
+
+          const nextBtn = document.getElementById("nextQuestionBtn");
+          if (nextBtn) {
+            if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+              nextBtn.textContent = "Fortsätt →";
+            }
+            nextBtn.style.display = "inline-block";
+          }
+          return;
+        }
+
+        // Wrong guess: prompt to try again without losing a point
+        const usedFactors = state.followUpUsedFactors || [];
+        const multHint = usedFactors.length >= 2
+          ? ` Tips: Du förkortade först med ${usedFactors.slice(0, -1).join(", ")} och sedan med ${usedFactors[usedFactors.length - 1]}. Vad blir ${usedFactors.join(" · ")}?`
+          : "";
+
+        if (!Number.isInteger(ans) || ans <= 1) {
+          hintEl.textContent = `Skriv ett heltal större än 1 och försök igen (du förlorar inga poäng).${multHint}`;
+        } else if (ans < biggest) {
+          hintEl.textContent = `Det går att förkorta med ett ännu större tal än ${ans}!${multHint} Försök igen (du förlorar inga poäng).`;
+        } else {
+          hintEl.textContent = `Talet ${ans} går inte jämnt ut i både ${q.origNum} och ${q.origDen}.${multHint} Försök igen (du förlorar inga poäng).`;
+        }
+        hintEl.style.display = "block";
+        inputEl.focus();
+        inputEl.select();
+      }
+
+      // Phase 4 (Direkt) validation
+      function handleDirectCheck() {
+        if (isScreenLocked() || state.questionSolved) return;
+
+        const q = state.question;
+        const resNumRaw = document.getElementById("resNumInput").value.trim();
+        const resDenRaw = document.getElementById("resDenInput").value.trim();
+
+        if (resNumRaw === "" || resDenRaw === "") {
+          showFeedback("Fyll i både täljaren och nämnaren innan du rättar.", "error");
+          return;
+        }
+
+        const resNum = Number(resNumRaw);
+        const resDen = Number(resDenRaw);
+
+        if (!Number.isInteger(resNum) || !Number.isInteger(resDen) || resNum <= 0 || resDen <= 0) {
+          recordMistake("Skriv positiva heltal i både täljaren och nämnaren (-1 poäng).", false);
+          return;
+        }
+
+        const isEquivalent = resNum * q.origDen === resDen * q.origNum;
+
+        if (q.mode === "div_given") {
+          const expN = q.origNum / q.givenFactor;
+          const expD = q.origDen / q.givenFactor;
+
+          if (resNum === expN && resDen === expD) {
+            lockStepInputsSolved();
+            document.getElementById("checkBtn").style.display = "none";
+            recordCorrectPoint(`Snyggt! Du förkortade med ${q.givenFactor} i anteckningsboken (+1 poäng).`);
+            if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+              setTimeout(render, 850);
+            } else {
+              document.getElementById("nextQuestionBtn").style.display = "inline-block";
+            }
+            return;
+          }
+
+          if (isEquivalent) {
+            recordMistake(
+              `Bråket har samma värde, men uppgiften ber dig att förkorta med ${q.givenFactor} (-1 poäng).`,
+              false
+            );
+          } else {
+            recordMistake(
+              `Inte riktigt. Dela både ${q.origNum} och ${q.origDen} med ${q.givenFactor} i din anteckningsbok. Ta hjälp av multiplikationstabellen om du behöver (-1 poäng).`,
+              true
+            );
+          }
+          return;
+        }
+
+        if (q.mode === "div_simplest") {
+          const g = gcd(q.origNum, q.origDen);
+          const expN = q.origNum / g;
+          const expD = q.origDen / g;
+
+          if (resNum === expN && resDen === expD) {
+            lockStepInputsSolved();
+            document.getElementById("checkBtn").style.display = "none";
+            recordCorrectPoint("Helt rätt! Bråket är förkortat till enklaste form (+1 poäng).");
+            if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+              setTimeout(render, 850);
+            } else {
+              document.getElementById("nextQuestionBtn").style.display = "inline-block";
+            }
+            return;
+          }
+
+          if (isEquivalent && resDen < q.origDen && gcd(resNum, resDen) > 1) {
+            recordMistake(
+              `Du är på rätt väg – ${resNum}/${resDen} har rätt värde, men kan förkortas ännu mer! Förkorta vidare i anteckningsboken tills bråket är i enklaste form (-1 poäng).`,
+              true
+            );
+            return;
+          }
+
+          if (resNum === q.origNum && resDen === q.origDen) {
+            recordMistake(
+              "Du skrev samma bråk igen. Förkorta täljaren och nämnaren med ett gemensamt tal i anteckningsboken (-1 poäng).",
+              true
+            );
+            return;
+          }
+
+          if (isEquivalent && resDen > q.origDen) {
+            recordMistake(
+              "Du förlängde bråket i stället för att förkorta det. Dela täljare och nämnare med samma tal (-1 poäng).",
+              false
+            );
+            return;
+          }
+
+          recordMistake(
+            `Inte riktigt. Hitta ett tal som går jämnt ut i både ${q.origNum} och ${q.origDen} i din anteckningsbok och förkorta så långt det går (-1 poäng).`,
+            true
+          );
+          return;
+        }
+
+        if (q.mode === "mult_given") {
+          const expN = q.origNum * q.givenFactor;
+          const expD = q.origDen * q.givenFactor;
+
+          if (resNum === expN && resDen === expD) {
+            lockStepInputsSolved();
+            document.getElementById("checkBtn").style.display = "none";
+            recordCorrectPoint(`Snyggt! Du förlängde med ${q.givenFactor} i anteckningsboken (+1 poäng).`);
+            if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+              setTimeout(render, 850);
+            } else {
+              document.getElementById("nextQuestionBtn").style.display = "inline-block";
+            }
+            return;
+          }
+
+          if (isEquivalent) {
+            recordMistake(
+              `Bråket har samma värde, men uppgiften ber dig att förlänga med ${q.givenFactor} (-1 poäng).`,
+              false
+            );
+          } else {
+            recordMistake(
+              `Inte riktigt. Multiplicera både ${q.origNum} och ${q.origDen} med ${q.givenFactor} i din anteckningsbok (-1 poäng).`,
+              true
+            );
+          }
+          return;
+        }
+
+        // mult_target
+        const k = q.targetDen / q.origDen;
+        const expN = q.origNum * k;
+        const expD = q.targetDen;
+
+        if (resNum === expN && resDen === expD) {
+          lockStepInputsSolved();
+          document.getElementById("checkBtn").style.display = "none";
+          recordCorrectPoint(`Helt rätt! Du förlängde bråket till nämnaren ${q.targetDen} (+1 poäng).`);
+          if (state.scores[state.currentPhase] >= TARGET_SCORE) {
+            setTimeout(render, 850);
+          } else {
+            document.getElementById("nextQuestionBtn").style.display = "inline-block";
+          }
+          return;
+        }
+
+        if (resDen !== q.targetDen) {
+          recordMistake(
+            `Nämnaren ska bli ${q.targetDen}, men du skrev ${resDen}. Ta reda på vilket tal du multiplicerar ${q.origDen} med för att få ${q.targetDen} (-1 poäng).`,
+            true
+          );
+        } else {
+          recordMistake(
+            `Nämnaren ${q.targetDen} stämmer, men täljaren blev fel. Kom ihåg att multiplicera täljaren (${q.origNum}) med samma tal som nämnaren (-1 poäng).`,
+            true
+          );
+        }
+      }
+
+      // Phases 1, 2, 3 validation
       function handleStepCheck() {
+        if (state.question && state.question.type === "direct") {
+          handleDirectCheck();
+          return;
+        }
+
         if (isScreenLocked() || state.questionSolved || state.awaitingFinalDecision || !state.opVerified) return;
 
         const q = state.question;
@@ -2619,7 +2842,7 @@
               );
               return;
             }
-            state.phase3History.push({
+            state.phase2History.push({
               fromN: q.curNum,
               fromD: q.curDen,
               k: k,
@@ -2648,6 +2871,27 @@
             }
             decisionBox.style.display = "none";
             recordCorrectPoint("Helt rätt! Bråket är förkortat så långt som möjligt (+1 poäng).");
+
+            // If student chained 2 or more steps, ask the follow-up question about the largest number
+            if (state.phase2History.length >= 1) {
+              state.awaitingFollowUp = true;
+              state.followUpAnswered = false;
+              state.followUpBiggest = gcd(q.origNum, q.origDen);
+              state.followUpStepsCount = state.phase2History.length + 1;
+              state.followUpFinalNum = expectedNum;
+              state.followUpFinalDen = expectedDen;
+              state.followUpUsedFactors = [...state.phase2History.map((h) => h.k), k];
+
+              const followUpBox = document.getElementById("followUpBox");
+              const followUpPrompt = document.getElementById("followUpPromptText");
+              followUpPrompt.innerHTML = `<strong>Följdfråga:</strong> Du löste uppgiften i ${state.followUpStepsCount} steg. Vilket är det <strong>största talet</strong> du hade kunnat förkorta ${fracHTML(q.origNum, q.origDen, "sm")} med direkt i ett enda steg?`;
+              followUpBox.style.display = "flex";
+
+              document.getElementById("btnCheckFollowUp").onclick = handleFollowUpCheck;
+              document.getElementById("followUpInput")?.focus();
+              return;
+            }
+
             if (state.scores[state.currentPhase] >= TARGET_SCORE) {
               setTimeout(render, 850);
             } else {
@@ -2657,7 +2901,7 @@
           return;
         }
 
-        // Standard phases (2, 4, 5, and non-simplest in 6)
+        // Standard phases (1 and 3)
         lockStepInputsSolved();
         document.getElementById("checkBtn").style.display = "none";
         const successMsg = expectsDiv
@@ -2719,7 +2963,7 @@
           return;
         }
 
-        // Enter key to check or move to next question
+        // Enter key to check, answer follow-up, or move to next question
         if (e.key === "Enter") {
           const activeId = document.activeElement ? document.activeElement.id : "";
           if (
@@ -2729,10 +2973,15 @@
           ) {
             return;
           }
+          if (state.awaitingFollowUp && !state.followUpAnswered) {
+            e.preventDefault();
+            handleFollowUpCheck();
+            return;
+          }
           const nextBtn = document.getElementById("nextQuestionBtn");
           if (nextBtn && nextBtn.style.display !== "none") {
             e.preventDefault();
-            loadNewQuestion();
+            nextBtn.click();
             return;
           }
           const checkBtn = document.getElementById("checkBtn");
